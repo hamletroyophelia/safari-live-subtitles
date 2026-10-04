@@ -57,7 +57,7 @@ enum Diagnostics {
             return
         }
         var result: [String: Any] = [
-            "appVersion": "0.4.0",
+            "appVersion": "0.5.0",
             "os": ProcessInfo.processInfo.operatingSystemVersionString,
             "onDeviceSpeechAvailable": SpeechTranscriber.isAvailable,
             "screenAudioPermission": CGPreflightScreenCaptureAccess(),

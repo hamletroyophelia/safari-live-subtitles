@@ -23,7 +23,7 @@ struct MainView: View {
                 Text("·").foregroundStyle(.secondary)
                 Text("无需 YouTube CC")
                 Spacer()
-                Text("LiveLingo 0.4").foregroundStyle(.secondary)
+                Text("LiveLingo 0.5").foregroundStyle(.secondary)
             }.font(.system(size: 11)).foregroundStyle(.secondary)
         }
         .padding(28)
@@ -165,12 +165,7 @@ struct MainView: View {
             }
             if let progress = model.downloadProgress { ProgressView(value: progress).tint(accent) }
             HStack(spacing: 4) {
-                Text("输入").font(.system(size: 10)).foregroundStyle(.secondary).padding(.trailing, 4)
-                ForEach(0..<26) { index in
-                    RoundedRectangle(cornerRadius: 1.5)
-                        .fill(model.audioLevel > Double(index) / 26 ? accent : Color.white.opacity(0.08))
-                        .frame(width: 5, height: 13)
-                }
+                AudioMeterView(meter: model.audioMeter)
                 Spacer()
                 if let seconds = model.translationSeconds {
                     Text(String(format: "译文 %.1fs", seconds)).font(.system(size: 10, design: .monospaced)).foregroundStyle(.secondary)
@@ -226,6 +221,20 @@ struct MainView: View {
     }
 }
 
+private struct AudioMeterView: View {
+    @ObservedObject var meter: AudioMeter
+    var body: some View {
+        HStack(spacing: 4) {
+            Text("输入").font(.system(size: 10)).foregroundStyle(.secondary).padding(.trailing, 4)
+            ForEach(0..<26) { index in
+                RoundedRectangle(cornerRadius: 1.5)
+                    .fill(meter.level > Double(index) / 26 ? accent : Color.white.opacity(0.08))
+                    .frame(width: 5, height: 13)
+            }
+        }
+    }
+}
+
 struct OverlayView: View {
     @ObservedObject var model: AppModel
     private var status: String {
@@ -260,6 +269,7 @@ struct OverlayView: View {
                 if let caption = model.current {
                     SubtitleTextView(caption: caption, style: model.subtitleStyle, targetSize: model.fontSize,
                                      width: model.overlayWidth, height: model.overlayHeight, automatic: model.overlayAutoHeight)
+                        .equatable()
                 } else {
                     Text(model.isPreparing ? "正在准备语言模型…" : "等待直播语音…")
                         .font(.system(size: model.fontSize * 0.8)).foregroundStyle(.white.opacity(0.65))

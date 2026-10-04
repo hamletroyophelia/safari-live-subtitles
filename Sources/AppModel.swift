@@ -5,6 +5,14 @@ import Speech
 import Translation
 import UniformTypeIdentifiers
 
+@MainActor final class AudioMeter: ObservableObject {
+    @Published private(set) var level = 0.0
+    func update(_ value: Double) {
+        let next = ceil(min(1, max(0, value)) * 26) / 26
+        if next != level { level = next }
+    }
+}
+
 @MainActor
 final class AppModel: ObservableObject {
     @Published var language: SourceLanguage = .japanese
@@ -18,9 +26,10 @@ final class AppModel: ObservableObject {
     @Published var isTextTrial = false
     @Published var errorMessage: String?
     @Published var downloadProgress: Double?
-    @Published var audioLevel: Double = 0
+    let audioMeter = AudioMeter()
     @Published var translationSeconds: Double?
     @Published var captions: [Caption] = []
+    @Published private(set) var historyCount = 0
     @Published var overlayVisible = false
     @Published var overlayLocked = false
     @Published var fontSize = 25.0
@@ -48,8 +57,10 @@ final class AppModel: ObservableObject {
     private let capture = AudioCapture()
     private var store = CaptionStore()
     private var generation = UUID()
-    private var translationInput: AsyncStream<TranslationJob>.Continuation?
-    private var translationStream: AsyncStream<TranslationJob>?
+    private var translationInput: AsyncStream<Void>.Continuation?
+    private var translationStream: AsyncStream<Void>?
+    private var translationBacklog = TranslationBacklog()
+    private var lastEnqueuedJob: TranslationJob?
     private var debounceTask: Task<Void, Never>?
     private var meterTask: Task<Void, Never>?
     private var demoTask: Task<Void, Never>?
@@ -212,7 +223,9 @@ final class AppModel: ObservableObject {
         isPreparing = true
         phase = "正在文字试译…"
         detail = "仅处理输入文字，不读取 Safari 声音。"
-        let (stream, continuation) = AsyncStream<TranslationJob>.makeStream(bufferingPolicy: .bufferingNewest(4))
+        let (stream, continuation) = AsyncStream<Void>.makeStream(bufferingPolicy: .bufferingNewest(1))
+        translationBacklog = TranslationBacklog()
+        lastEnqueuedJob = nil
         translationStream = stream
         translationInput = continuation
         translationConfiguration = makeTranslationConfiguration()
@@ -228,12 +241,15 @@ final class AppModel: ObservableObject {
         trialText = nil
         store = CaptionStore()
         captions = []
+        historyCount = 0
         generation = UUID()
         isPreparing = true
         phase = "准备语言模型…"
         detail = "识别与翻译在本机运行；首次下载可能需要几分钟。"
         translationSeconds = nil
-        let (stream, continuation) = AsyncStream<TranslationJob>.makeStream(bufferingPolicy: .bufferingNewest(4))
+        let (stream, continuation) = AsyncStream<Void>.makeStream(bufferingPolicy: .bufferingNewest(1))
+        translationBacklog = TranslationBacklog()
+        lastEnqueuedJob = nil
         translationStream = stream
         translationInput = continuation
         translationConfiguration = makeTranslationConfiguration()
@@ -250,7 +266,9 @@ final class AppModel: ObservableObject {
         isPreparing = true
         phase = "准备语言模型…"
         detail = "仅下载和加载模型，不读取 Safari 声音。"
-        let (stream, continuation) = AsyncStream<TranslationJob>.makeStream(bufferingPolicy: .bufferingNewest(4))
+        let (stream, continuation) = AsyncStream<Void>.makeStream(bufferingPolicy: .bufferingNewest(1))
+        translationBacklog = TranslationBacklog()
+        lastEnqueuedJob = nil
         translationStream = stream
         translationInput = continuation
         translationConfiguration = makeTranslationConfiguration()
@@ -296,7 +314,7 @@ final class AppModel: ObservableObject {
                 let caption = store.ingest(text: text, start: 0, end: 1, isFinal: true)!
                 let job = TranslationJob(id: caption.id, revision: 0, text: text, generation: run)
                 _ = store.applyTranslation(result.text, for: job, notes: result.notes, usedFallback: result.usedFallback)
-                captions = store.items
+                publishCaptions()
                 trialText = nil
                 translationInput?.finish()
                 translationInput = nil
@@ -353,7 +371,7 @@ final class AppModel: ObservableObject {
             }, onLevel: { [weak self] level in
                 Task { @MainActor in
                     guard let self, self.generation == run else { return }
-                    self.audioLevel = level
+                    self.audioMeter.update(level)
                     if level > 0.15 { self.lastAudioTime = Date() }
                 }
             }, onError: { [weak self] error in
@@ -369,7 +387,8 @@ final class AppModel: ObservableObject {
             lastAudioTime = Date()
             setOverlay(visible: true)
             startMeterMonitor(run: run)
-            for await job in jobs {
+            for await _ in jobs {
+              while run == generation, let job = translationBacklog.pop() {
                 try Task.checkCancellation()
                 guard run == generation, job.generation == run else { continue }
                 // Skip outdated partial revisions before spending translation time on them.
@@ -379,10 +398,12 @@ final class AppModel: ObservableObject {
                     glossary: activeGlossary, profileID: activeProfile, session: session)
                 guard run == generation else { return }
                 if store.applyTranslation(response.text, for: job, notes: response.notes, usedFallback: response.usedFallback) {
-                    captions = store.items
+                    publishCaptions()
                     translationSeconds = Date().timeIntervalSince(begun)
-                    detail = "\(language.title)原文与中文译文同步显示"
+                    let nextDetail = "\(language.title)原文与中文译文同步显示"
+                    if detail != nextDetail { detail = nextDetail }
                 }
+              }
             }
         } catch {
             if run == generation, !Task.isCancelled { fail(error) }
@@ -391,7 +412,7 @@ final class AppModel: ObservableObject {
 
     private func receive(text: String, start: Double, end: Double, final: Bool) {
         guard let caption = store.ingest(text: text, start: start, end: end, isFinal: final) else { return }
-        captions = store.items
+        publishCaptions()
         if caption.translatedSource == caption.source { return }
         if final {
             if pendingPartial?.id == caption.id { debounceTask?.cancel(); debounceTask = nil; pendingPartial = nil }
@@ -414,8 +435,17 @@ final class AppModel: ObservableObject {
     }
 
     private func enqueue(_ caption: Caption) {
-        translationInput?.yield(TranslationJob(id: caption.id, revision: caption.revision,
-                                               text: caption.source, generation: generation))
+        let job = TranslationJob(id: caption.id, revision: caption.revision, text: caption.source, generation: generation)
+        if let last = lastEnqueuedJob, last.id == job.id, last.text == job.text, last.generation == job.generation { return }
+        lastEnqueuedJob = job
+        translationBacklog.enqueue(job)
+        translationInput?.yield(())
+    }
+
+    private func publishCaptions() {
+        let visible = store.visibleItems()
+        if captions != visible { captions = visible }
+        if historyCount != store.items.count { historyCount = store.items.count }
     }
 
     private func startMeterMonitor(run: UUID) {
@@ -440,6 +470,8 @@ final class AppModel: ObservableObject {
         translationInput?.finish()
         translationInput = nil
         translationStream = nil
+        translationBacklog = TranslationBacklog()
+        lastEnqueuedJob = nil
         translationConfiguration = nil
         debounceTask?.cancel(); debounceTask = nil
         pendingPartial = nil
@@ -453,7 +485,7 @@ final class AppModel: ObservableObject {
             isRunning = false
             isStopping = false
             modelsOnly = false
-            audioLevel = 0
+            audioMeter.update(0)
             downloadProgress = nil
             phase = errorMessage == nil ? "已停止" : "需要处理"
             if errorMessage == nil { detail = "字幕已保留，可以导出或重新开始。" }

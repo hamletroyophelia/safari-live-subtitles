@@ -34,9 +34,26 @@ struct TranslationJob: Sendable {
     let generation: UUID
 }
 
+/// Coalesce queued revisions of the same utterance without displacing other utterances.
+struct TranslationBacklog {
+    private(set) var jobs: [TranslationJob] = []
+    let limit: Int
+    init(limit: Int = 4) { self.limit = max(1, limit) }
+    mutating func enqueue(_ job: TranslationJob) {
+        if let i = jobs.firstIndex(where: { $0.id == job.id && $0.generation == job.generation }) {
+            jobs[i] = job
+        } else {
+            jobs.append(job)
+            if jobs.count > limit { jobs.removeFirst(jobs.count - limit) }
+        }
+    }
+    mutating func pop() -> TranslationJob? { jobs.isEmpty ? nil : jobs.removeFirst() }
+}
+
 /// SpeechTranscriber emits replacements over audio ranges, not an append-only transcript.
 struct CaptionStore {
     private(set) var items: [Caption] = []
+    private var volatileCount = 0
     let limit: Int
     init(limit: Int = 2000) { self.limit = max(1, limit) }
 
@@ -44,12 +61,41 @@ struct CaptionStore {
     mutating func ingest(text: String, start: Double, end: Double, isFinal: Bool) -> Caption? {
         let text = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, start.isFinite, end.isFinite, start >= 0, end >= start else { return nil }
-        let previous = items.first { abs($0.start - start) < 0.015 }
-        // Remove superseded volatile ranges. Keep adjacent final utterances intact.
-        items.removeAll {
-            abs($0.start - start) < 0.015 ||
-            (!$0.isFinal && $0.start < end - 0.001 && $0.end > start + 0.001)
+        // Almost all streaming results replace the last utterance. Mutate it in place.
+        if let last = items.last, abs(last.start - start) < 0.015,
+           (items.count < 2 || items[items.count - 2].start <= start - 0.015),
+           volatileCount == (last.isFinal ? 0 : 1) {
+            let next = revised(last, text: text, start: start, end: end, isFinal: isFinal)
+            items[items.count - 1] = next
+            volatileCount = isFinal ? 0 : 1
+            return next
         }
+        if volatileCount == 0, let last = items.last, start >= last.end, start - last.start >= 0.015 {
+            let next = revised(nil, text: text, start: start, end: end, isFinal: isFinal)
+            items.append(next)
+            volatileCount = isFinal ? 0 : 1
+            trim()
+            return next
+        }
+        let candidate = insertionIndex(start - 0.015)
+        let previous = items[candidate...].prefix { $0.start < start + 0.015 }.first { abs($0.start - start) < 0.015 }
+        // Remove superseded volatile ranges. Keep adjacent final utterances intact.
+        var removedVolatile = 0
+        items.removeAll {
+            let remove = abs($0.start - start) < 0.015 ||
+            (!$0.isFinal && $0.start < end - 0.001 && $0.end > start + 0.001)
+            if remove && !$0.isFinal { removedVolatile += 1 }
+            return remove
+        }
+        volatileCount -= removedVolatile
+        let next = revised(previous, text: text, start: start, end: end, isFinal: isFinal)
+        items.insert(next, at: insertionIndex(start))
+        if !isFinal { volatileCount += 1 }
+        trim()
+        return next
+    }
+
+    private func revised(_ previous: Caption?, text: String, start: Double, end: Double, isFinal: Bool) -> Caption {
         var next = Caption(id: previous?.id ?? UUID(), start: start, end: end,
                            source: text, isFinal: isFinal)
         if let previous {
@@ -62,15 +108,34 @@ struct CaptionStore {
                 next.glossaryFallback = previous.glossaryFallback
             }
         }
-        items.append(next)
-        items.sort { $0.start < $1.start }
-        if items.count > limit { items.removeFirst(items.count - limit) }
         return next
     }
 
+    private func insertionIndex(_ start: Double) -> Int {
+        var low = 0, high = items.count
+        while low < high {
+            let middle = (low + high) / 2
+            if items[middle].start < start { low = middle + 1 } else { high = middle }
+        }
+        return low
+    }
+
+    private mutating func trim() {
+        guard items.count > limit else { return }
+        let overflow = items.count - limit
+        volatileCount -= items.prefix(overflow).reduce(0) { $0 + ($1.isFinal ? 0 : 1) }
+        items.removeFirst(overflow)
+    }
+
+    func visibleItems(limit: Int = 80) -> [Caption] { Array(items.suffix(max(1, limit))) }
+
+    private func index(for job: TranslationJob) -> Int? {
+        items.indices.reversed().first { items[$0].id == job.id }
+    }
+
     mutating func applyTranslation(_ translated: String, for job: TranslationJob, notes: [TermNote] = [], usedFallback: Bool = false) -> Bool {
-        guard isApplicable(job), !translated.isEmpty,
-              let i = items.firstIndex(where: { $0.id == job.id }) else { return false }
+        guard !translated.isEmpty, let i = index(for: job),
+              items[i].source.hasPrefix(job.text), job.text.count >= items[i].translatedSource.count else { return false }
         items[i].translation = translated
         items[i].translatedSource = job.text
         items[i].termNotes = notes
@@ -79,7 +144,8 @@ struct CaptionStore {
     }
 
     func isApplicable(_ job: TranslationJob) -> Bool {
-        guard let caption = items.first(where: { $0.id == job.id }) else { return false }
+        guard let i = index(for: job) else { return false }
+        let caption = items[i]
         return caption.source.hasPrefix(job.text) && job.text.count >= caption.translatedSource.count
     }
 

@@ -160,6 +160,8 @@ struct GameGlossary {
             _ = try expanded(profile.id, path: [])
         }
         var candidates: [String: [Candidate]] = [:]
+        // Inherited and combined profiles share compiled regexes for identical aliases.
+        var compiledPatterns: [String: NSRegularExpression] = [:]
         for profile in document.profiles {
             let inherited = try expanded(profile.id, path: [])
             for language in ["ja", "en"] {
@@ -176,9 +178,14 @@ struct GameGlossary {
                                 let targets = Set(previous.term.target.components(separatedBy: " / ") + [term.target])
                                 effective = GlossaryTerm(ja: term.ja, en: term.en, target: targets.sorted().joined(separator: " / "), mode: "hint")
                             }
-                            aliases[key] = Candidate(
-                                pattern: try NSRegularExpression(pattern: pattern, options: language == "en" ? [.caseInsensitive] : []),
-                                term: effective, priority: priority)
+                            let patternKey = language + ":" + pattern
+                            let regex: NSRegularExpression
+                            if let cached = compiledPatterns[patternKey] { regex = cached }
+                            else {
+                                regex = try NSRegularExpression(pattern: pattern, options: language == "en" ? [.caseInsensitive] : [])
+                                compiledPatterns[patternKey] = regex
+                            }
+                            aliases[key] = Candidate(pattern: regex, term: effective, priority: priority)
                         }
                     }
                 }

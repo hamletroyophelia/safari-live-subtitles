@@ -40,6 +40,50 @@ import Foundation
         precondition(!streaming.applyTranslation("今天翻译日语", for: longJob))
         precondition(CaptionDisplay.tail("短い文", limit: 10) == "短い文")
         precondition(CaptionDisplay.tail("日本語の長い字幕", limit: 4) == "…長い字幕")
-        print("PASS: correction, stable-prefix streaming, stale-response rejection, finalization, bounded history, SRT, display tail")
+        var backlog = TranslationBacklog(limit: 2)
+        let other = TranslationJob(id: UUID(), revision: 0, text: "next", generation: shortJob.generation)
+        backlog.enqueue(shortJob)
+        backlog.enqueue(other)
+        backlog.enqueue(longJob)
+        // Use one generation when coalescing; a different session must not replace the old job.
+        precondition(backlog.jobs.count == 2)
+        var sameRun = TranslationBacklog()
+        sameRun.enqueue(shortJob)
+        sameRun.enqueue(other)
+        let latest = TranslationJob(id: shortJob.id, revision: 2, text: longJob.text, generation: shortJob.generation)
+        sameRun.enqueue(latest)
+        precondition(sameRun.pop()?.text == latest.text && sameRun.pop()?.id == other.id && sameRun.pop() == nil)
+        for i in 0..<10 { backlog.enqueue(TranslationJob(id: UUID(), revision: i, text: String(i), generation: UUID())) }
+        precondition(backlog.jobs.count == 2 && backlog.pop()?.text == "8" && backlog.pop()?.text == "9")
+
+        var history = CaptionStore()
+        for i in 0..<2000 { history.ingest(text: String(i), start: Double(i * 2), end: Double(i * 2 + 1), isFinal: true) }
+        let snapshot = history.visibleItems()
+        history.ingest(text: "replacement", start: 3998, end: 3999, isFinal: true)
+        precondition(history.items.count == 2000 && history.visibleItems().count == 80)
+        precondition(snapshot.last?.source == "1999" && history.items.last?.source == "replacement")
+        precondition(history.srt().contains("2000\n"), "visible snapshots must not truncate exported history")
+
+        // Differential range audit against the original removal rules, including near-start boundaries.
+        var ranges: [(Double, Double, String, Bool)] = []
+        var audit = CaptionStore(limit: 17)
+        var seed: UInt64 = 12345
+        for i in 0..<5000 {
+            seed = seed &* 6364136223846793005 &+ 1
+            let start = Double((seed >> 32) % 150) / 100
+            let end = start + Double((seed >> 16) % 100) / 100
+            let final = seed % 3 == 0
+            let text = String(i)
+            ranges.removeAll { abs($0.0 - start) < 0.015 || (!$0.3 && $0.0 < end - 0.001 && $0.1 > start + 0.001) }
+            ranges.append((start, end, text, final))
+            ranges.sort { $0.0 < $1.0 }
+            if ranges.count > 17 { ranges.removeFirst(ranges.count - 17) }
+            audit.ingest(text: text, start: start, end: end, isFinal: final)
+            precondition(audit.items.count == ranges.count)
+            for (caption, expected) in zip(audit.items, ranges) {
+                precondition(caption.start == expected.0 && caption.end == expected.1 && caption.source == expected.2 && caption.isFinal == expected.3)
+            }
+        }
+        print("PASS: streaming, stale responses, bounded history, full SRT, immutable visible snapshots, coalesced translation backlog, 5000 range revisions")
     }
 }

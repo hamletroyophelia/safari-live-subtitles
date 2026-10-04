@@ -57,10 +57,16 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
         let hostingView = DraggableHostingView(rootView: OverlayView(model: model))
         hostingView.sizingOptions = []
         overlay.contentView = hostingView
-        Publishers.CombineLatest(Publishers.CombineLatest4(model.$captions, model.$fontSize, model.$overlayWidth, model.$overlayAutoHeight), model.$subtitleStyle)
+        Publishers.CombineLatest4(model.$fontSize, model.$overlayWidth, model.$overlayAutoHeight, model.$subtitleStyle)
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.fitOverlayHeight() }
             .store(in: &overlaySubscriptions)
+        model.$captions.map { $0.last }.removeDuplicates()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let self, self.model.overlayVisible, self.model.overlayAutoHeight else { return }
+                self.fitOverlayHeight()
+            }.store(in: &overlaySubscriptions)
         let savedOrigin = model.overlayOrigin
         resetOverlayPosition()
         if let origin = savedOrigin {
@@ -69,7 +75,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
                 overlay.setFrameOrigin(origin)
             }
         }
-        model.onShowOverlay = { [weak self] in self?.overlay.orderFrontRegardless() }
+        model.onShowOverlay = { [weak self] in self?.fitOverlayHeight(); self?.overlay.orderFrontRegardless() }
         model.onHideOverlay = { [weak self] in self?.overlay.orderOut(nil) }
         model.onLockOverlay = { [weak self] locked in self?.overlay.ignoresMouseEvents = locked }
         model.onResetOverlay = { [weak self] in self?.resetOverlayPosition() }

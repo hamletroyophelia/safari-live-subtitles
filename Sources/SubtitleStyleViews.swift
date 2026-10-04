@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Shared by the live panel and the settings preview; dictionary diagnostics never enter this view.
-struct SubtitleTextView: View {
+struct SubtitleTextView: View, Equatable {
     let caption: Caption
     let style: SubtitleStyle
     let targetSize: Double

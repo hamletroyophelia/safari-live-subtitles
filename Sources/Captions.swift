@@ -114,7 +114,7 @@ enum CaptionDisplay {
     }
 
     static func source(_ caption: Caption, width: Double, fontSize: Double) -> String {
-        tail(caption.source, limit: max(4, Int((width - 48) / (fontSize * 0.74) * 2.5)))
+        tail(caption.source, limit: max(4, Int((width - 48) / fontSize * 2.5)))
     }
     static func target(_ caption: Caption, width: Double, fontSize: Double) -> String {
         tail(caption.translation, limit: max(4, Int((width - 48) / fontSize * 2.5)))

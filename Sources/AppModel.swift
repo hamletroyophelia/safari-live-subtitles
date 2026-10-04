@@ -25,6 +25,8 @@ final class AppModel: ObservableObject {
     @Published var overlayLocked = false
     @Published var fontSize = 25.0
     @Published var backgroundOpacity = 0.82
+    @Published var subtitleStyle = SubtitleStyle()
+    @Published var showingSubtitleStyle = false
     @Published var overlayWidth = 760.0
     @Published var overlayHeight = 130.0
     @Published var overlayAutoHeight = true
@@ -66,8 +68,10 @@ final class AppModel: ObservableObject {
         language = SourceLanguage(rawValue: saved.string(forKey: "sourceLanguage") ?? "") ?? .japanese
         fontSize = saved.object(forKey: "fontSize") == nil ? 25 : saved.double(forKey: "fontSize")
         backgroundOpacity = saved.object(forKey: "backgroundOpacity") == nil ? 0.82 : saved.double(forKey: "backgroundOpacity")
-        fontSize = min(42, max(16, fontSize))
-        backgroundOpacity = min(1, max(0.25, backgroundOpacity))
+        fontSize = min(48, max(16, fontSize))
+        backgroundOpacity = min(1, max(0, backgroundOpacity))
+        subtitleStyle = saved.data(forKey: "subtitleStyle").flatMap { try? JSONDecoder().decode(SubtitleStyle.self, from: $0) }?.normalized()
+            ?? .initial(targetSize: fontSize)
         overlayWidth = min(1600, max(440, saved.object(forKey: "overlayWidth") == nil ? 760 : saved.double(forKey: "overlayWidth")))
         overlayHeight = min(900, max(105, saved.object(forKey: "overlayHeight") == nil ? 130 : saved.double(forKey: "overlayHeight")))
         overlayAutoHeight = saved.object(forKey: "overlayAutoHeight") == nil ? true : saved.bool(forKey: "overlayAutoHeight")
@@ -97,6 +101,7 @@ final class AppModel: ObservableObject {
         defaults.set(language.rawValue, forKey: "sourceLanguage")
         defaults.set(fontSize, forKey: "fontSize")
         defaults.set(backgroundOpacity, forKey: "backgroundOpacity")
+        if let data = try? JSONEncoder().encode(subtitleStyle.normalized()) { defaults.set(data, forKey: "subtitleStyle") }
         defaults.set(overlayWidth, forKey: "overlayWidth")
         defaults.set(overlayHeight, forKey: "overlayHeight")
         defaults.set(overlayAutoHeight, forKey: "overlayAutoHeight")
@@ -106,6 +111,31 @@ final class AppModel: ObservableObject {
             defaults.set(overlayOrigin.x, forKey: "overlayX")
             defaults.set(overlayOrigin.y, forKey: "overlayY")
         }
+    }
+
+    func applySubtitlePreset(_ preset: SubtitlePreset) {
+        var style = SubtitleStyle()
+        switch preset {
+        case .dark:
+            fontSize = 25
+            backgroundOpacity = 0.82
+        case .transparent:
+            fontSize = 28
+            backgroundOpacity = 0
+            style.sourceFontSize = 20
+            style.textShadow = 3
+            style.showsBorder = false
+        case .chinese:
+            fontSize = 30
+            backgroundOpacity = 0.72
+            style.sourceFontSize = 16
+            style.targetColor = "#FFE28A"
+            style.targetWeight = .bold
+            style.translationFirst = true
+            style.textShadow = 1
+        }
+        subtitleStyle = style
+        savePreferences()
     }
 
     private func customGlossaryURL() throws -> URL {

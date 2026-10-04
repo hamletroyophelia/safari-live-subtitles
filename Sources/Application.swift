@@ -57,7 +57,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
         let hostingView = DraggableHostingView(rootView: OverlayView(model: model))
         hostingView.sizingOptions = []
         overlay.contentView = hostingView
-        Publishers.CombineLatest4(model.$captions, model.$fontSize, model.$overlayWidth, model.$overlayAutoHeight)
+        Publishers.CombineLatest(Publishers.CombineLatest4(model.$captions, model.$fontSize, model.$overlayWidth, model.$overlayAutoHeight), model.$subtitleStyle)
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.fitOverlayHeight() }
             .store(in: &overlaySubscriptions)
@@ -123,29 +123,30 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
 
     private func fitOverlayHeight() {
         guard let overlay, !fittingOverlay else { return }
-        overlay.minSize = NSSize(width: 440, height: max(105, ceil(model.fontSize * 2.1 + 60) + (model.current?.termNotes.isEmpty == false ? 18 : 0)))
-        guard model.overlayAutoHeight else { return }
+        let style = model.subtitleStyle
+        overlay.minSize = NSSize(width: 440, height: style.minimumHeight(targetSize: model.fontSize))
         let width = max(1, overlay.frame.width - 48)
-        func textHeight(_ text: String, size: Double, weight: NSFont.Weight) -> Double {
-            let font = NSFont.systemFont(ofSize: size, weight: weight)
+        func textHeight(_ text: String, size: Double, weight: SubtitleWeight) -> Double {
+            let font = style.fontDesign.nativeFont(size: size, weight: weight)
             let bounds = (text as NSString).boundingRect(with: NSSize(width: width, height: 1000),
                 options: [.usesLineFragmentOrigin, .usesFontLeading], attributes: [.font: font])
             let lineHeight = NSLayoutManager().defaultLineHeight(for: font)
             return min(ceil(bounds.height) + 3, ceil(lineHeight * 3))
         }
         let height: Double
-        if let caption = model.current {
-            let source = CaptionDisplay.source(caption, width: overlay.frame.width, fontSize: model.fontSize)
+        if !model.overlayAutoHeight {
+            height = overlay.frame.height
+        } else if let caption = model.current {
+            let source = CaptionDisplay.source(caption, width: overlay.frame.width, fontSize: style.sourceFontSize)
             let target = caption.translation.isEmpty ? "正在翻译…" : CaptionDisplay.target(caption, width: overlay.frame.width, fontSize: model.fontSize)
-            height = 62 + textHeight(source, size: model.fontSize * 0.74, weight: .medium)
-                + textHeight(target, size: model.fontSize, weight: .semibold)
-                + (caption.termNotes.isEmpty ? 0 : 18)
+            height = 62 + (style.showSource ? style.spacing + textHeight(source, size: style.sourceFontSize, weight: style.sourceWeight) : 0)
+                + textHeight(target, size: model.fontSize, weight: style.targetWeight)
         } else {
             height = max(118, model.fontSize + 86)
         }
         var frame = overlay.frame
         let visible = (overlay.screen ?? NSScreen.main)?.visibleFrame
-        let fittedHeight = min(360, max(overlay.minSize.height, ceil(height)))
+        let fittedHeight = min(model.overlayAutoHeight ? 480 : 900, max(overlay.minSize.height, ceil(height)))
         guard abs(frame.height - fittedHeight) > 1 else { return }
         frame.size.height = fittedHeight
         if let visible {

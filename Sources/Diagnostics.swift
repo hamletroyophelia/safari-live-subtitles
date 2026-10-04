@@ -33,12 +33,31 @@ enum Diagnostics {
             guard await LanguageAvailability().status(from: source, to: target) == .installed else {
                 throw LiveError.message("翻译语言模型未安装；请通过应用的开始字幕完成系统模型下载。")
             }
-            let session = TranslationSession(installedSource: source, target: target)
-            print(try await session.translate(arguments[i + 1]).targetText)
+            let session: TranslationSession
+            if #available(macOS 26.4, *) {
+                session = TranslationSession(installedSource: source, target: target, preferredStrategy: .lowLatency)
+            } else { session = TranslationSession(installedSource: source, target: target) }
+            let profile = arguments.firstIndex(of: "--game").flatMap { $0 + 1 < arguments.count ? arguments[$0 + 1] : nil }
+            var glossary: GameGlossary?
+            if let profile {
+                let url: URL
+                if let j = arguments.firstIndex(of: "--glossary-file"), arguments.count > j + 1 { url = URL(fileURLWithPath: arguments[j + 1]) }
+                else { url = try GameGlossary.bundledURL() }
+                glossary = try GameGlossary(data: Data(contentsOf: url))
+                guard glossary!.profiles.contains(where: { $0.id == profile }) else { throw GlossaryError("词典中没有该游戏分类。") }
+            }
+            let result = try await GlossaryTranslator.translate(arguments[i + 1],
+                language: arguments.contains("--english") ? .english : .japanese,
+                glossary: glossary, profileID: profile ?? "", session: session)
+            if arguments.contains("--glossary-report") {
+                let report: [String: Any] = ["source": arguments[i + 1], "text": result.text,
+                    "usedFallback": result.usedFallback, "terms": result.notes.map { ["source": $0.source, "target": $0.target, "applied": $0.applied] as [String: Any] }]
+                print(String(decoding: try JSONSerialization.data(withJSONObject: report, options: [.sortedKeys]), as: UTF8.self))
+            } else { print(result.text) }
             return
         }
         var result: [String: Any] = [
-            "appVersion": "0.2.0",
+            "appVersion": "0.3.0",
             "os": ProcessInfo.processInfo.operatingSystemVersionString,
             "onDeviceSpeechAvailable": SpeechTranscriber.isAvailable,
             "screenAudioPermission": CGPreflightScreenCaptureAccess(),

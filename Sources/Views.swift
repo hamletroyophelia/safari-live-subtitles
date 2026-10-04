@@ -23,7 +23,7 @@ struct MainView: View {
                 Text("·").foregroundStyle(.secondary)
                 Text("无需 YouTube CC")
                 Spacer()
-                Text("LiveLingo 0.2").foregroundStyle(.secondary)
+                Text("LiveLingo 0.3").foregroundStyle(.secondary)
             }.font(.system(size: 11)).foregroundStyle(.secondary)
         }
         .padding(28)
@@ -36,6 +36,8 @@ struct MainView: View {
         }
         .onChange(of: model.fontSize) { _, _ in model.savePreferences() }
         .onChange(of: model.backgroundOpacity) { _, _ in model.savePreferences() }
+        .onChange(of: model.glossaryEnabled) { _, _ in model.savePreferences() }
+        .onChange(of: model.glossaryProfileID) { _, _ in model.savePreferences() }
     }
 
     private var header: some View {
@@ -56,7 +58,8 @@ struct MainView: View {
     }
 
     private var controls: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        ScrollView {
+        VStack(alignment: .leading, spacing: 12) {
             sectionLabel("声音与语言")
             VStack(alignment: .leading, spacing: 5) {
                 Text("听哪个应用").font(.system(size: 11)).foregroundStyle(.secondary)
@@ -87,6 +90,29 @@ struct MainView: View {
             Button("准备语言模型") { model.prepareModels() }
                 .controlSize(.small).disabled(model.busy)
             Divider()
+            VStack(alignment: .leading, spacing: 6) {
+                Toggle("游戏术语词典", isOn: $model.glossaryEnabled)
+                    .toggleStyle(.checkbox).font(.system(size: 11, weight: .semibold))
+                    .disabled(model.busy || model.glossaryProfiles.isEmpty)
+                Picker("游戏分类", selection: $model.glossaryProfileID) {
+                    ForEach(model.glossaryProfiles) { Text($0.displayName).tag($0.id) }
+                }.labelsHidden().disabled(model.busy || !model.glossaryEnabled)
+                Text("\(model.glossaryLabel) · \(model.glossaryStatus)")
+                    .font(.system(size: 9)).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack {
+                    Button("导入 JSON") { model.importGlossary() }
+                    Button("恢复内置") { model.resetGlossary() }
+                    Button("试译") { model.tryGlossaryText() }
+                }.controlSize(.mini).disabled(model.busy)
+                Text("综合覆盖全部游戏；冲突仅提示。切换前先停止字幕。")
+                    .font(.system(size: 9)).foregroundStyle(.secondary)
+                if #unavailable(macOS 26.4) {
+                    Text("当前系统仅显示术语对照；保护译名需 macOS 26.4。")
+                        .font(.system(size: 9)).foregroundStyle(.secondary)
+                }
+            }
+            Divider()
             HStack {
                 sectionLabel("悬浮字幕")
                 Spacer()
@@ -114,6 +140,7 @@ struct MainView: View {
                 Label("音频捕获权限设置", systemImage: "gearshape")
             }.buttonStyle(.link).font(.system(size: 11))
         }
+        }
         .padding(17).frame(maxHeight: .infinity)
         .background(.white.opacity(0.035), in: RoundedRectangle(cornerRadius: 14))
     }
@@ -125,7 +152,7 @@ struct MainView: View {
                     .frame(width: 7, height: 7)
                 Text(model.phase).font(.system(size: 13, weight: .semibold))
                 Spacer()
-                if model.isDemo { Text("演示").font(.system(size: 10, weight: .bold)).foregroundStyle(accent) }
+                if model.isDemo { Text(model.isTextTrial ? "文字试译" : "演示").font(.system(size: 10, weight: .bold)).foregroundStyle(accent) }
             }
             Text(model.detail).font(.system(size: 11)).foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -179,6 +206,13 @@ struct MainView: View {
                                 Text(caption.source).font(.system(size: 13)).foregroundStyle(.secondary)
                                 Text(caption.translation.isEmpty ? "正在翻译…" : caption.translation)
                                     .font(.system(size: 15, weight: .medium)).foregroundStyle(caption.translation.isEmpty ? Color.gray : ink)
+                                if !caption.termNotes.isEmpty {
+                                    Text(CaptionDisplay.terms(caption)).font(.system(size: 10)).foregroundStyle(accent)
+                                    if caption.glossaryFallback {
+                                        Text("本句术语保护未通过，已回退为原文翻译；词典仅供对照。")
+                                            .font(.system(size: 9)).foregroundStyle(.secondary)
+                                    }
+                                }
                             }.textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
                             Divider().overlay(.white.opacity(0.03))
                         }
@@ -198,10 +232,11 @@ struct MainView: View {
 
 struct OverlayView: View {
     @ObservedObject var model: AppModel
-    private var sourceLines: Int { model.overlayAutoHeight ? 3 : max(1, min(3, Int((model.overlayHeight - 66) * 0.42 / (model.fontSize * 0.92)))) }
-    private var targetLines: Int { model.overlayAutoHeight ? 3 : max(1, min(3, Int((model.overlayHeight - 66) * 0.58 / (model.fontSize * 1.24)))) }
+    private var termHeight: Double { model.current?.termNotes.isEmpty == false ? 18 : 0 }
+    private var sourceLines: Int { model.overlayAutoHeight ? 3 : max(1, min(3, Int((model.overlayHeight - 66 - termHeight) * 0.42 / (model.fontSize * 0.92)))) }
+    private var targetLines: Int { model.overlayAutoHeight ? 3 : max(1, min(3, Int((model.overlayHeight - 66 - termHeight) * 0.58 / (model.fontSize * 1.24)))) }
     private var status: String {
-        if model.isDemo { return "字幕预览 · 演示文字" }
+        if model.isDemo { return model.isTextTrial ? "词典文字试译 · 未读取音频" : "字幕预览 · 演示文字" }
         if !model.busy { return "字幕已停止" }
         if model.isPreparing { return "正在准备" }
         guard let caption = model.current else { return "\(model.language.title) → 中文 · 等待语音" }
@@ -237,6 +272,10 @@ struct OverlayView: View {
                         .font(.system(size: model.fontSize, weight: .semibold))
                         .foregroundStyle(caption.translation.isEmpty ? .white.opacity(0.45) : .white)
                         .lineLimit(targetLines).truncationMode(.head)
+                    if !caption.termNotes.isEmpty {
+                        Text(CaptionDisplay.terms(caption)).font(.system(size: 10)).foregroundStyle(accent.opacity(0.8))
+                            .lineLimit(1).truncationMode(.tail).help(CaptionDisplay.terms(caption))
+                    }
                 } else {
                     Text(model.isPreparing ? "正在准备语言模型…" : "等待直播语音…")
                         .font(.system(size: model.fontSize * 0.8)).foregroundStyle(.white.opacity(0.65))

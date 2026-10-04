@@ -15,6 +15,7 @@ final class AppModel: ObservableObject {
     @Published var isRunning = false
     @Published var isStopping = false
     @Published var isDemo = false
+    @Published var isTextTrial = false
     @Published var errorMessage: String?
     @Published var downloadProgress: Double?
     @Published var audioLevel: Double = 0
@@ -30,6 +31,12 @@ final class AppModel: ObservableObject {
     var overlayOrigin: NSPoint?
     @Published var translationConfiguration: TranslationSession.Configuration?
     @Published var screenPermission = CGPreflightScreenCaptureAccess()
+    @Published var glossaryEnabled = true
+    @Published var glossaryProfileID = "all_games"
+    @Published private(set) var glossaryProfiles: [GameProfile] = []
+    @Published private(set) var glossaryStatus = ""
+    @Published private(set) var glossaryLabel = "内置词典"
+    private var glossary: GameGlossary?
 
     var onShowOverlay: (() -> Void)?
     var onHideOverlay: (() -> Void)?
@@ -48,6 +55,7 @@ final class AppModel: ObservableObject {
     private var lastPartialTranslationTime = Date.distantPast
     private var pendingPartial: Caption?
     private var modelsOnly = false
+    private var trialText: String?
     private var lastTranslationConfiguration: TranslationSession.Configuration?
 
     var busy: Bool { isPreparing || isRunning || isStopping }
@@ -66,6 +74,22 @@ final class AppModel: ObservableObject {
         if saved.object(forKey: "overlayX") != nil, saved.object(forKey: "overlayY") != nil {
             overlayOrigin = NSPoint(x: saved.double(forKey: "overlayX"), y: saved.double(forKey: "overlayY"))
         }
+        glossaryEnabled = saved.object(forKey: "glossaryEnabled") == nil ? true : saved.bool(forKey: "glossaryEnabled")
+        glossaryProfileID = saved.string(forKey: "glossaryProfileID") ?? "all_games"
+        do {
+            let custom = try customGlossaryURL()
+            if FileManager.default.fileExists(atPath: custom.path) {
+                do {
+                    try loadGlossary(from: custom, label: "自定义词典")
+                } catch {
+                    try loadGlossary(from: GameGlossary.bundledURL(), label: "内置词典")
+                    glossaryStatus = "自定义词典无效，已使用内置词典。"
+                }
+            } else { try loadGlossary(from: GameGlossary.bundledURL(), label: "内置词典") }
+        } catch {
+            glossaryEnabled = false
+            glossaryStatus = error.localizedDescription
+        }
     }
 
     func savePreferences() {
@@ -76,10 +100,92 @@ final class AppModel: ObservableObject {
         defaults.set(overlayWidth, forKey: "overlayWidth")
         defaults.set(overlayHeight, forKey: "overlayHeight")
         defaults.set(overlayAutoHeight, forKey: "overlayAutoHeight")
+        defaults.set(glossaryEnabled, forKey: "glossaryEnabled")
+        defaults.set(glossaryProfileID, forKey: "glossaryProfileID")
         if let overlayOrigin {
             defaults.set(overlayOrigin.x, forKey: "overlayX")
             defaults.set(overlayOrigin.y, forKey: "overlayY")
         }
+    }
+
+    private func customGlossaryURL() throws -> URL {
+        try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+            .appendingPathComponent(Bundle.main.bundleIdentifier ?? "LiveLingo")
+            .appendingPathComponent("game-glossary.json")
+    }
+
+    private func loadGlossary(from url: URL, label: String) throws {
+        let loaded = try GameGlossary(data: Data(contentsOf: url))
+        glossary = loaded
+        glossaryProfiles = loaded.profiles
+        if !loaded.profiles.contains(where: { $0.id == glossaryProfileID }) { glossaryProfileID = loaded.profiles[0].id }
+        glossaryLabel = label
+        glossaryStatus = "\(loaded.profiles.count) 个配置 · \(loaded.profiles.reduce(0) { $0 + $1.terms.count }) 条术语"
+    }
+
+    func importGlossary() {
+        guard !busy else { return }
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.json]
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        panel.message = "导入游戏术语 JSON；有效后替换当前词典。格式见项目 examples/game-glossary.json。"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do {
+            let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
+            guard ((attributes[.size] as? NSNumber)?.intValue ?? Int.max) <= 2_000_000 else { throw GlossaryError("词典不能超过 2 MB。") }
+            let data = try Data(contentsOf: url)
+            _ = try GameGlossary(data: data)
+            let destination = try customGlossaryURL()
+            try FileManager.default.createDirectory(at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try data.write(to: destination, options: .atomic)
+            try loadGlossary(from: destination, label: "自定义词典")
+            savePreferences()
+        } catch { glossaryStatus = "导入失败：\(error.localizedDescription)" }
+    }
+
+    func resetGlossary() {
+        guard !busy else { return }
+        do {
+            let bundled = try GameGlossary.bundledURL()
+            let data = try Data(contentsOf: bundled)
+            _ = try GameGlossary(data: data)
+            let custom = try customGlossaryURL()
+            if FileManager.default.fileExists(atPath: custom.path) { try FileManager.default.removeItem(at: custom) }
+            try loadGlossary(from: bundled, label: "内置词典")
+            savePreferences()
+        } catch { glossaryStatus = "恢复失败：\(error.localizedDescription)" }
+    }
+
+    func tryGlossaryText() {
+        guard !busy else { return }
+        let prompt = NSAlert()
+        prompt.messageText = "词典文字试译"
+        prompt.informativeText = "输入\(language.title)原文，检查当前游戏词典的译名；不读取直播声音。"
+        let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 410, height: 60))
+        let profile = glossaryProfiles.first { $0.id == glossaryProfileID }
+        let term = profile?.terms.first { $0.mode == "protect" } ?? profile?.terms.first
+        field.stringValue = (language == .japanese ? term?.ja.first : term?.en.first) ?? ""
+        prompt.accessoryView = field
+        prompt.addButton(withTitle: "试译")
+        prompt.addButton(withTitle: "取消")
+        prompt.window.initialFirstResponder = field
+        guard prompt.runModal() == .alertFirstButtonReturn else { return }
+        let text = field.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+        endDemo()
+        savePreferences()
+        errorMessage = nil
+        generation = UUID()
+        trialText = text
+        modelsOnly = false
+        isPreparing = true
+        phase = "正在文字试译…"
+        detail = "仅处理输入文字，不读取 Safari 声音。"
+        let (stream, continuation) = AsyncStream<TranslationJob>.makeStream(bufferingPolicy: .bufferingNewest(4))
+        translationStream = stream
+        translationInput = continuation
+        translationConfiguration = makeTranslationConfiguration()
     }
 
     func start() {
@@ -89,6 +195,7 @@ final class AppModel: ObservableObject {
         screenPermission = CGPreflightScreenCaptureAccess()
         errorMessage = nil
         modelsOnly = false
+        trialText = nil
         store = CaptionStore()
         captions = []
         generation = UUID()
@@ -109,6 +216,7 @@ final class AppModel: ObservableObject {
         errorMessage = nil
         generation = UUID()
         modelsOnly = true
+        trialText = nil
         isPreparing = true
         phase = "准备语言模型…"
         detail = "仅下载和加载模型，不读取 Safari 声音。"
@@ -141,11 +249,37 @@ final class AppModel: ObservableObject {
     func runTranslation(session: TranslationSession) async {
         let run = generation
         guard isPreparing, let jobs = translationStream else { return }
+        let activeGlossary = glossaryEnabled ? glossary : nil
+        let activeProfile = glossaryProfileID
+        let activeLanguage = language
         do {
             phase = "准备中文翻译模型…"
             try await session.prepareTranslation()
             try Task.checkCancellation()
             guard run == generation else { return }
+            if let text = trialText {
+                let result = try await GlossaryTranslator.translate(text, language: activeLanguage,
+                    glossary: activeGlossary, profileID: activeProfile, session: session)
+                try Task.checkCancellation()
+                guard run == generation else { return }
+                store = CaptionStore()
+                let caption = store.ingest(text: text, start: 0, end: 1, isFinal: true)!
+                let job = TranslationJob(id: caption.id, revision: 0, text: text, generation: run)
+                _ = store.applyTranslation(result.text, for: job, notes: result.notes, usedFallback: result.usedFallback)
+                captions = store.items
+                trialText = nil
+                translationInput?.finish()
+                translationInput = nil
+                translationStream = nil
+                isPreparing = false
+                isDemo = true
+                isTextTrial = true
+                phase = "词典文字试译完成"
+                detail = "这是输入文字的真实本机译文，没有读取直播声音。"
+                translationConfiguration = nil
+                setOverlay(visible: true)
+                return
+            }
             speech.onStatus = { [weak self] text in
                 guard let self, self.generation == run else { return }; self.phase = text
             }
@@ -211,9 +345,10 @@ final class AppModel: ObservableObject {
                 // Skip outdated partial revisions before spending translation time on them.
                 guard store.isApplicable(job) else { continue }
                 let begun = Date()
-                let response = try await session.translate(job.text)
+                let response = try await GlossaryTranslator.translate(job.text, language: activeLanguage,
+                    glossary: activeGlossary, profileID: activeProfile, session: session)
                 guard run == generation else { return }
-                if store.applyTranslation(response.targetText, for: job) {
+                if store.applyTranslation(response.text, for: job, notes: response.notes, usedFallback: response.usedFallback) {
                     captions = store.items
                     translationSeconds = Date().timeIntervalSince(begun)
                     detail = "\(language.title)原文与中文译文同步显示"
@@ -280,6 +415,7 @@ final class AppModel: ObservableObject {
         pendingPartial = nil
         meterTask?.cancel(); meterTask = nil
         endDemo()
+        trialText = nil
         Task {
             await capture.stop()
             await speech.stop()
@@ -346,6 +482,7 @@ final class AppModel: ObservableObject {
         demoTask?.cancel(); demoTask = nil
         if isDemo { captions = [] }
         isDemo = false
+        isTextTrial = false
     }
 
     func exportSRT() {

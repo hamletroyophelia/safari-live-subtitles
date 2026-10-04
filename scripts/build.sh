@@ -13,6 +13,7 @@ xcrun swiftc -parse-as-library -swift-version 5 -O \
     Sources/*.swift -o "$app_dir/Contents/MacOS/LiveLingo"
 cp Resources/Info.plist "$app_dir/Contents/Info.plist"
 cp build/AppIcon.icns "$app_dir/Contents/Resources/AppIcon.icns"
+cp Resources/game-glossary.json "$app_dir/Contents/Resources/game-glossary.json"
 codesign --force --sign - --identifier local.livelingo.safari-live-subtitles \
     --requirements '=designated => identifier "local.livelingo.safari-live-subtitles"' "$app_dir"
 codesign --verify --strict "$app_dir"

@@ -123,7 +123,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
 
     private func fitOverlayHeight() {
         guard let overlay, !fittingOverlay else { return }
-        overlay.minSize = NSSize(width: 440, height: max(105, ceil(model.fontSize * 2.1 + 60)))
+        overlay.minSize = NSSize(width: 440, height: max(105, ceil(model.fontSize * 2.1 + 60) + (model.current?.termNotes.isEmpty == false ? 18 : 0)))
         guard model.overlayAutoHeight else { return }
         let width = max(1, overlay.frame.width - 48)
         func textHeight(_ text: String, size: Double, weight: NSFont.Weight) -> Double {
@@ -139,6 +139,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
             let target = caption.translation.isEmpty ? "正在翻译…" : CaptionDisplay.target(caption, width: overlay.frame.width, fontSize: model.fontSize)
             height = 62 + textHeight(source, size: model.fontSize * 0.74, weight: .medium)
                 + textHeight(target, size: model.fontSize, weight: .semibold)
+                + (caption.termNotes.isEmpty ? 0 : 18)
         } else {
             height = max(118, model.fontSize + 86)
         }

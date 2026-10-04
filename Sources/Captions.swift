@@ -23,6 +23,8 @@ struct Caption: Identifiable, Codable, Equatable {
     var translatedSource: String = ""
     var isFinal: Bool
     var revision: Int = 0
+    var termNotes: [TermNote] = []
+    var glossaryFallback = false
 }
 
 struct TranslationJob: Sendable {
@@ -56,6 +58,8 @@ struct CaptionStore {
             if !previous.translatedSource.isEmpty, text.hasPrefix(previous.translatedSource) {
                 next.translation = previous.translation
                 next.translatedSource = previous.translatedSource
+                next.termNotes = previous.termNotes
+                next.glossaryFallback = previous.glossaryFallback
             }
         }
         items.append(next)
@@ -64,11 +68,13 @@ struct CaptionStore {
         return next
     }
 
-    mutating func applyTranslation(_ translated: String, for job: TranslationJob) -> Bool {
+    mutating func applyTranslation(_ translated: String, for job: TranslationJob, notes: [TermNote] = [], usedFallback: Bool = false) -> Bool {
         guard isApplicable(job), !translated.isEmpty,
               let i = items.firstIndex(where: { $0.id == job.id }) else { return false }
         items[i].translation = translated
         items[i].translatedSource = job.text
+        items[i].termNotes = notes
+        items[i].glossaryFallback = usedFallback
         return true
     }
 
@@ -93,6 +99,9 @@ struct CaptionStore {
 }
 
 enum CaptionDisplay {
+    static func terms(_ caption: Caption) -> String {
+        caption.termNotes.map { "\($0.applied ? "词典" : "对照")：\($0.source)→\($0.target)" }.joined(separator: " · ")
+    }
     static func tail(_ text: String, limit: Int) -> String {
         guard text.count > limit else { return text }
         var suffix = String(text.suffix(max(1, limit)))

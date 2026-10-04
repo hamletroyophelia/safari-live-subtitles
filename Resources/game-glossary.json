@@ -1,0 +1,1259 @@
+{
+  "schemaVersion": 2,
+  "description": "Built-in game terminology. Select the game before use. Protect entries enforce Chinese names; hint entries provide context only.",
+  "profiles": [
+    {
+      "id": "all_games",
+      "title": "综合游戏（全部）",
+      "inherits": [
+        "common",
+        "fighting",
+        "fps",
+        "souls_common",
+        "elden_ring",
+        "dark_souls",
+        "sekiro",
+        "lies_of_p",
+        "nioh",
+        "lords_of_the_fallen",
+        "minecraft"
+      ],
+      "resolveConflicts": "hint",
+      "terms": []
+    },
+    {
+      "id": "common",
+      "terms": [
+        {
+          "ja": [
+            "実況"
+          ],
+          "en": [
+            "commentary"
+          ],
+          "zh-Hans": "实况解说",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "配信"
+          ],
+          "en": [
+            "stream"
+          ],
+          "zh-Hans": "直播",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "初見プレイ"
+          ],
+          "en": [
+            "blind playthrough"
+          ],
+          "zh-Hans": "初见游玩",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ネタバレ"
+          ],
+          "en": [
+            "spoiler"
+          ],
+          "zh-Hans": "剧透",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "攻略"
+          ],
+          "en": [
+            "walkthrough"
+          ],
+          "zh-Hans": "攻略",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "縛りプレイ"
+          ],
+          "en": [
+            "challenge run"
+          ],
+          "zh-Hans": "限制玩法",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "周回"
+          ],
+          "en": [
+            "playthrough"
+          ],
+          "zh-Hans": "周目",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "バグ"
+          ],
+          "en": [
+            "bug"
+          ],
+          "zh-Hans": "程序错误",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "ラグ"
+          ],
+          "en": [
+            "lag"
+          ],
+          "zh-Hans": "延迟",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "アプデ"
+          ],
+          "en": [
+            "update"
+          ],
+          "zh-Hans": "更新",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "ナーフ"
+          ],
+          "en": [
+            "nerf"
+          ],
+          "zh-Hans": "削弱",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "バフ"
+          ],
+          "en": [
+            "buff"
+          ],
+          "zh-Hans": "增强",
+          "mode": "hint"
+        }
+      ],
+      "title": "通用实况",
+      "inherits": []
+    },
+    {
+      "id": "fighting",
+      "terms": [
+        {
+          "ja": [
+            "コンボ"
+          ],
+          "en": [
+            "combo"
+          ],
+          "zh-Hans": "连招",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "対空"
+          ],
+          "en": [
+            "anti-air"
+          ],
+          "zh-Hans": "对空",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "差し返し"
+          ],
+          "en": [
+            "whiff punish"
+          ],
+          "zh-Hans": "确反落空招式",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "確定反撃"
+          ],
+          "en": [
+            "punish"
+          ],
+          "zh-Hans": "确定反击",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "投げ抜け"
+          ],
+          "en": [
+            "throw tech"
+          ],
+          "zh-Hans": "拆投",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "起き攻め"
+          ],
+          "en": [
+            "okizeme"
+          ],
+          "zh-Hans": "起身压制",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "中段"
+          ],
+          "en": [
+            "overhead"
+          ],
+          "zh-Hans": "中段攻击",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "下段"
+          ],
+          "en": [
+            "low attack"
+          ],
+          "zh-Hans": "下段攻击",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "フレーム"
+          ],
+          "en": [
+            "frame"
+          ],
+          "zh-Hans": "帧",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "有利フレーム"
+          ],
+          "en": [
+            "frame advantage"
+          ],
+          "zh-Hans": "有利帧",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "暴れ"
+          ],
+          "en": [
+            "mashing"
+          ],
+          "zh-Hans": "乱按抢招",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "ガード"
+          ],
+          "en": [
+            "block"
+          ],
+          "zh-Hans": "防御",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "めくり"
+          ],
+          "en": [
+            "cross-up"
+          ],
+          "zh-Hans": "逆向攻击",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "読み合い"
+          ],
+          "en": [
+            "mind game"
+          ],
+          "zh-Hans": "博弈",
+          "mode": "hint"
+        }
+      ],
+      "title": "格斗游戏",
+      "inherits": [
+        "common"
+      ]
+    },
+    {
+      "id": "fps",
+      "terms": [
+        {
+          "ja": [
+            "エイム"
+          ],
+          "en": [
+            "aim"
+          ],
+          "zh-Hans": "瞄准",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "リコイル"
+          ],
+          "en": [
+            "recoil"
+          ],
+          "zh-Hans": "后坐力",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ヘッドショット"
+          ],
+          "en": [
+            "headshot"
+          ],
+          "zh-Hans": "爆头",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "リロード"
+          ],
+          "en": [
+            "reload"
+          ],
+          "zh-Hans": "换弹",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ピーク"
+          ],
+          "en": [
+            "peek"
+          ],
+          "zh-Hans": "探头",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "カバー"
+          ],
+          "en": [
+            "cover"
+          ],
+          "zh-Hans": "掩护",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "フランク"
+          ],
+          "en": [
+            "flank"
+          ],
+          "zh-Hans": "绕后",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ローテート"
+          ],
+          "en": [
+            "rotate"
+          ],
+          "zh-Hans": "转点",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "クラッチ"
+          ],
+          "en": [
+            "clutch"
+          ],
+          "zh-Hans": "残局逆转",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "エコラウンド"
+          ],
+          "en": [
+            "eco round"
+          ],
+          "zh-Hans": "经济局",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ラッシュ"
+          ],
+          "en": [
+            "rush"
+          ],
+          "zh-Hans": "快攻",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "スモーク"
+          ],
+          "en": [
+            "smoke"
+          ],
+          "zh-Hans": "烟雾",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "設置"
+          ],
+          "en": [
+            "plant"
+          ],
+          "zh-Hans": "下包",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "解除"
+          ],
+          "en": [
+            "defuse"
+          ],
+          "zh-Hans": "拆包",
+          "mode": "hint"
+        }
+      ],
+      "title": "FPS",
+      "inherits": [
+        "common"
+      ]
+    },
+    {
+      "id": "souls_common",
+      "terms": [
+        {
+          "ja": [
+            "ボス"
+          ],
+          "en": [
+            "boss",
+            "bosses"
+          ],
+          "zh-Hans": "Boss",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "スタミナ"
+          ],
+          "en": [
+            "stamina"
+          ],
+          "zh-Hans": "耐力",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ローリング"
+          ],
+          "en": [
+            "dodge roll"
+          ],
+          "zh-Hans": "翻滚",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "回避"
+          ],
+          "en": [
+            "dodge"
+          ],
+          "zh-Hans": "闪避",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "パリィ"
+          ],
+          "en": [
+            "parry"
+          ],
+          "zh-Hans": "弹反",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "バックスタブ"
+          ],
+          "en": [
+            "backstab"
+          ],
+          "zh-Hans": "背刺",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "無敵時間"
+          ],
+          "en": [
+            "invincibility frames"
+          ],
+          "zh-Hans": "无敌帧",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ロックオン"
+          ],
+          "en": [
+            "lock-on"
+          ],
+          "zh-Hans": "锁定",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ビルド"
+          ],
+          "en": [
+            "build"
+          ],
+          "zh-Hans": "配装",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "重ロリ"
+          ],
+          "en": [
+            "fat roll"
+          ],
+          "zh-Hans": "重翻滚",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "軽ロリ"
+          ],
+          "en": [
+            "light roll"
+          ],
+          "zh-Hans": "轻翻滚",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "二周目"
+          ],
+          "en": [
+            "New Game Plus"
+          ],
+          "zh-Hans": "二周目",
+          "mode": "protect"
+        }
+      ],
+      "title": "魂游通用",
+      "inherits": [
+        "common"
+      ]
+    },
+    {
+      "id": "elden_ring",
+      "terms": [
+        {
+          "ja": [
+            "祝福"
+          ],
+          "en": [
+            "Site of Grace",
+            "Sites of Grace"
+          ],
+          "zh-Hans": "祝福",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ルーン"
+          ],
+          "en": [
+            "runes",
+            "rune"
+          ],
+          "zh-Hans": "卢恩",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "戦灰"
+          ],
+          "en": [
+            "Ash of War",
+            "Ashes of War"
+          ],
+          "zh-Hans": "战灰",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "強靭"
+          ],
+          "en": [
+            "poise"
+          ],
+          "zh-Hans": "强韧度",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "体勢を崩す"
+          ],
+          "en": [
+            "stance break"
+          ],
+          "zh-Hans": "打出处决硬直",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ガードカウンター"
+          ],
+          "en": [
+            "guard counter"
+          ],
+          "zh-Hans": "防御反击",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "遺灰"
+          ],
+          "en": [
+            "spirit ashes"
+          ],
+          "zh-Hans": "骨灰",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "褪せ人"
+          ],
+          "en": [
+            "Tarnished"
+          ],
+          "zh-Hans": "褪色者",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "出血"
+          ],
+          "en": [
+            "blood loss"
+          ],
+          "zh-Hans": "出血",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "大ルーン"
+          ],
+          "en": [
+            "Great Rune",
+            "Great Runes"
+          ],
+          "zh-Hans": "大卢恩",
+          "mode": "protect"
+        }
+      ],
+      "title": "艾尔登法环",
+      "inherits": [
+        "common",
+        "souls_common"
+      ]
+    },
+    {
+      "id": "dark_souls",
+      "terms": [
+        {
+          "ja": [
+            "篝火"
+          ],
+          "en": [
+            "bonfire",
+            "bonfires"
+          ],
+          "zh-Hans": "篝火",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ソウル"
+          ],
+          "en": [
+            "souls"
+          ],
+          "zh-Hans": "灵魂",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "人間性"
+          ],
+          "en": [
+            "humanity"
+          ],
+          "zh-Hans": "人性",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "エスト瓶"
+          ],
+          "en": [
+            "Estus Flask"
+          ],
+          "zh-Hans": "原素瓶",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "火継ぎ"
+          ],
+          "en": [
+            "linking the fire"
+          ],
+          "zh-Hans": "传火",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "不死人"
+          ],
+          "en": [
+            "Undead"
+          ],
+          "zh-Hans": "不死人",
+          "mode": "protect"
+        }
+      ],
+      "title": "黑暗之魂",
+      "inherits": [
+        "common",
+        "souls_common"
+      ]
+    },
+    {
+      "id": "sekiro",
+      "terms": [
+        {
+          "ja": [
+            "体幹"
+          ],
+          "en": [
+            "posture"
+          ],
+          "zh-Hans": "躯干",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "弾き"
+          ],
+          "en": [
+            "deflection"
+          ],
+          "zh-Hans": "弹开",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "忍殺"
+          ],
+          "en": [
+            "deathblow"
+          ],
+          "zh-Hans": "忍杀",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "見切り"
+          ],
+          "en": [
+            "Mikiri Counter"
+          ],
+          "zh-Hans": "识破",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "回生"
+          ],
+          "en": [
+            "resurrection"
+          ],
+          "zh-Hans": "回生",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "形代"
+          ],
+          "en": [
+            "Spirit Emblem"
+          ],
+          "zh-Hans": "纸人",
+          "mode": "protect"
+        }
+      ],
+      "title": "只狼",
+      "inherits": [
+        "common",
+        "souls_common"
+      ]
+    },
+    {
+      "id": "lies_of_p",
+      "terms": [
+        {
+          "ja": [
+            "パーフェクトガード"
+          ],
+          "en": [
+            "Perfect Guard"
+          ],
+          "zh-Hans": "完美防御",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "フェイブルアーツ"
+          ],
+          "en": [
+            "Fable Arts"
+          ],
+          "zh-Hans": "虚构之技",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "リージョンアーム"
+          ],
+          "en": [
+            "Legion Arm"
+          ],
+          "zh-Hans": "军团义手",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "エルゴ"
+          ],
+          "en": [
+            "Ergo"
+          ],
+          "zh-Hans": "自我素",
+          "mode": "protect"
+        }
+      ],
+      "title": "匹诺曹的谎言",
+      "inherits": [
+        "common",
+        "souls_common"
+      ]
+    },
+    {
+      "id": "nioh",
+      "terms": [
+        {
+          "ja": [
+            "気力"
+          ],
+          "en": [
+            "Ki"
+          ],
+          "zh-Hans": "精力",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "残心"
+          ],
+          "en": [
+            "Ki Pulse"
+          ],
+          "zh-Hans": "残心",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "妖怪"
+          ],
+          "en": [
+            "Yokai"
+          ],
+          "zh-Hans": "妖怪",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "上段"
+          ],
+          "en": [
+            "high stance"
+          ],
+          "zh-Hans": "上段架势",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "中段"
+          ],
+          "en": [
+            "mid stance"
+          ],
+          "zh-Hans": "中段架势",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "下段"
+          ],
+          "en": [
+            "low stance"
+          ],
+          "zh-Hans": "下段架势",
+          "mode": "protect"
+        }
+      ],
+      "title": "仁王",
+      "inherits": [
+        "common",
+        "souls_common"
+      ]
+    },
+    {
+      "id": "lords_of_the_fallen",
+      "terms": [
+        {
+          "ja": [
+            "アンブラル"
+          ],
+          "en": [
+            "Umbral"
+          ],
+          "zh-Hans": "影界",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "アクシオム"
+          ],
+          "en": [
+            "Axiom"
+          ],
+          "zh-Hans": "生者世界",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ソウルフレイ"
+          ],
+          "en": [
+            "Soulflay"
+          ],
+          "zh-Hans": "摄魂",
+          "mode": "protect"
+        }
+      ],
+      "title": "堕落之主",
+      "inherits": [
+        "common",
+        "souls_common"
+      ]
+    },
+    {
+      "id": "minecraft",
+      "terms": [
+        {
+          "ja": [
+            "クリーパー",
+            "くりーぱー"
+          ],
+          "en": [
+            "Creeper",
+            "creepers"
+          ],
+          "zh-Hans": "苦力怕",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "エンダードラゴン"
+          ],
+          "en": [
+            "Ender Dragon"
+          ],
+          "zh-Hans": "末影龙",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ネザー"
+          ],
+          "en": [
+            "Nether"
+          ],
+          "zh-Hans": "下界",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "エンド"
+          ],
+          "en": [
+            "The End"
+          ],
+          "zh-Hans": "末地",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "レッドストーン"
+          ],
+          "en": [
+            "redstone"
+          ],
+          "zh-Hans": "红石",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ダイヤモンド"
+          ],
+          "en": [
+            "diamond",
+            "diamonds"
+          ],
+          "zh-Hans": "钻石",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "エリトラ"
+          ],
+          "en": [
+            "elytra"
+          ],
+          "zh-Hans": "鞘翅",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "村人"
+          ],
+          "en": [
+            "villager",
+            "villagers"
+          ],
+          "zh-Hans": "村民",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "作業台"
+          ],
+          "en": [
+            "crafting table"
+          ],
+          "zh-Hans": "工作台",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "かまど"
+          ],
+          "en": [
+            "furnace"
+          ],
+          "zh-Hans": "熔炉",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "スポナー"
+          ],
+          "en": [
+            "spawner"
+          ],
+          "zh-Hans": "刷怪笼",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "湧き潰し"
+          ],
+          "en": [
+            "spawn-proofing"
+          ],
+          "zh-Hans": "防刷怪",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "エンチャント"
+          ],
+          "en": [
+            "enchantment"
+          ],
+          "zh-Hans": "附魔",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "耐久力"
+          ],
+          "en": [
+            "Unbreaking"
+          ],
+          "zh-Hans": "耐久",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "修繕"
+          ],
+          "en": [
+            "Mending"
+          ],
+          "zh-Hans": "经验修补",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "シルクタッチ"
+          ],
+          "en": [
+            "Silk Touch"
+          ],
+          "zh-Hans": "精准采集",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "幸運"
+          ],
+          "en": [
+            "Fortune"
+          ],
+          "zh-Hans": "时运",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ハードコア"
+          ],
+          "en": [
+            "Hardcore"
+          ],
+          "zh-Hans": "极限模式",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "サバイバル"
+          ],
+          "en": [
+            "Survival"
+          ],
+          "zh-Hans": "生存模式",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "クリエイティブ"
+          ],
+          "en": [
+            "Creative"
+          ],
+          "zh-Hans": "创造模式",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "バイオーム"
+          ],
+          "en": [
+            "biome"
+          ],
+          "zh-Hans": "生物群系",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "座標"
+          ],
+          "en": [
+            "coordinates"
+          ],
+          "zh-Hans": "坐标",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "チャンク"
+          ],
+          "en": [
+            "chunk",
+            "chunks"
+          ],
+          "zh-Hans": "区块",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "拠点"
+          ],
+          "en": [
+            "base"
+          ],
+          "zh-Hans": "基地",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "トラップ"
+          ],
+          "en": [
+            "farm"
+          ],
+          "zh-Hans": "刷怪设施",
+          "mode": "hint"
+        }
+      ],
+      "title": "Minecraft",
+      "inherits": [
+        "common"
+      ]
+    }
+  ]
+}

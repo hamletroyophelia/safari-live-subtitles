@@ -1,0 +1,8 @@
+#!/bin/zsh
+set -euo pipefail
+project_dir="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$project_dir"
+mkdir -p build/module-cache
+xcrun swiftc -parse-as-library -module-cache-path "$project_dir/build/module-cache" \
+    Sources/Captions.swift Tests/CaptionTests.swift -o build/caption-tests
+build/caption-tests

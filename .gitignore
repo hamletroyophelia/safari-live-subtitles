@@ -1,0 +1,12 @@
+.build/
+build/
+verification/
+.DS_Store
+*.xcuserstate
+.env
+exports/
+dist/
+.env.*
+*.log
+*.pem
+*.key

@@ -1,0 +1,7 @@
+# LiveLingo icon
+
+Generated with the built-in ImageGen tool. The original raster is `AppIcon.png`; `scripts/make-icon.sh` creates the standard macOS icon sizes and ICNS container using sips and iconutil.
+
+## Final prompt
+
+Use case: logo-brand. Asset type: production macOS application icon for LiveLingo, a native live bilingual subtitle app for Safari audio, Japanese or English speech translated to Chinese. Create a single polished 1024x1024 square icon, no mockup. A large rounded-square deep midnight navy tile with a very subtle indigo/periwinkle gradient, softly beveled glass-like edges and restrained dimensional depth. At center, two overlapping bold caption/speech cards: the upper card is cool white with one large perfectly formed Japanese hiragana character あ in navy; the lower card is luminous periwinkle with one large perfectly formed Chinese character 文 in dark navy. Add a small simple audio waveform of three vertical bars between the cards or integrated into their shared edge, communicating real-time speech. Balanced, minimal, elegant, recognisable at 32px, ample safe margins; matches a dark macOS subtitle utility with light lavender accents. Straight-on view, centered composition. Exact text: あ and 文 only. No letters, other words, brand logos, browser logos, YouTube logo, watermark, frame outside the tile, or decorative background. Outside the rounded tile is actual transparency, not a checkerboard.

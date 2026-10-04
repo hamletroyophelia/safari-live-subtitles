@@ -1,0 +1,11 @@
+# Privacy
+
+LiveLingo processes the selected application's audio using Apple SpeechAnalyzer / SpeechTranscriber and Translation on the Mac. It registers only audio output with ScreenCaptureKit; it does not register a screen-image output and does not capture the microphone.
+
+The app does not save recordings or screen images, automatically persist subtitle text, send subtitle content to a project server, or use an API key. Caption history is held in memory; explicitly exporting SRT writes text to the destination selected by the user. Language assets may need a network download. UI preferences such as language, font, window position and size are stored in local UserDefaults.
+
+Apple frameworks and macOS have their own policies. Apple's TranslationSession documentation describes collection of API usage metrics, such as the app bundle identifier and language pair, without collecting the translated source or target text. See [Apple TranslationSession](https://developer.apple.com/documentation/translation/translationsession).
+
+Diagnostics intentionally print results when explicitly invoked. Audio capture logs contain operational information such as selected capture mode, audio format and levels; they do not deliberately log transcript content. Review command output and exported subtitles before sharing them.
+
+This public package uses a generic bundle identifier. Publication excludes local project memory, conversation history, test recordings, browser content, screenshots, runtime preferences, logs, caches, secrets and personal machine paths. It is a curated source snapshot rather than an export of the original working directory.

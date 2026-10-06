@@ -47,7 +47,8 @@ final class SpeechEngine {
             try await installation.downloadAndInstall()
         }
         try Task.checkCancellation()
-        let analyzer = SpeechAnalyzer(modules: [transcriber])
+        let analyzer = SpeechAnalyzer(modules: [transcriber],
+            options: .init(priority: .userInitiated, modelRetention: .whileInUse))
         self.analyzer = analyzer
         guard let format = await SpeechAnalyzer.bestAvailableAudioFormat(compatibleWith: [transcriber]) else {
             throw LiveError.message("无法取得语音识别音频格式。")

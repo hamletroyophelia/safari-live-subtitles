@@ -81,7 +81,7 @@ struct SubtitleStyle: Codable, Equatable {
     }
 
     func minimumHeight(targetSize: Double) -> Double {
-        max(105, ceil(62 + (showSource ? spacing + lineHeight(source: true, targetSize: targetSize) : 0)
+        max(105, ceil(68 + (showSource ? spacing + lineHeight(source: true, targetSize: targetSize) : 0)
             + lineHeight(source: false, targetSize: targetSize)))
     }
 
@@ -92,7 +92,7 @@ struct SubtitleStyle: Codable, Equatable {
 
     func lineLimit(source: Bool, height: Double, targetSize: Double, automatic: Bool) -> Int {
         if automatic { return 3 }
-        let available = max(1, height - 62 - (showSource ? spacing : 0))
+        let available = max(1, height - 68 - (showSource ? spacing : 0))
         let sourceHeight = lineHeight(source: true, targetSize: targetSize)
         let targetHeight = lineHeight(source: false, targetSize: targetSize)
         let rowHeight = source ? sourceHeight : targetHeight

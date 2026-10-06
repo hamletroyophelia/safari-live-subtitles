@@ -96,11 +96,14 @@ struct GlossaryPlan {
 struct GameGlossary {
     let document: GlossaryDocument
     private struct Candidate {
-        let pattern: NSRegularExpression
         let term: GlossaryTerm
         let priority: Int
     }
-    private let candidates: [String: [Candidate]]
+    private struct Matcher {
+        let pattern: NSRegularExpression
+        let aliases: [String: Candidate]
+    }
+    private let matchers: [String: Matcher]
     var profiles: [GameProfile] { document.profiles }
 
     static func bundledURL() throws -> URL {
@@ -159,8 +162,8 @@ struct GameGlossary {
             }
             _ = try expanded(profile.id, path: [])
         }
-        var candidates: [String: [Candidate]] = [:]
-        // Inherited and combined profiles share compiled regexes for identical aliases.
+        var matchers: [String: Matcher] = [:]
+        // One longest-first literal matcher per profile/language instead of scanning every alias.
         var compiledPatterns: [String: NSRegularExpression] = [:]
         for profile in document.profiles {
             let inherited = try expanded(profile.id, path: [])
@@ -169,8 +172,6 @@ struct GameGlossary {
                 for (priority, group) in inherited.enumerated() {
                     for term in group.terms {
                         for alias in language == "ja" ? term.ja : term.en {
-                            let escaped = NSRegularExpression.escapedPattern(for: alias)
-                            let pattern = language == "en" ? "(?<![\\p{L}\\p{N}_])\(escaped)(?![\\p{L}\\p{N}_])" : escaped
                             let key = language == "en" ? alias.lowercased() : alias
                             var effective = term
                             if profile.resolveConflicts == "hint", let previous = aliases[key],
@@ -178,44 +179,47 @@ struct GameGlossary {
                                 let targets = Set(previous.term.target.components(separatedBy: " / ") + [term.target])
                                 effective = GlossaryTerm(ja: term.ja, en: term.en, target: targets.sorted().joined(separator: " / "), mode: "hint")
                             }
-                            let patternKey = language + ":" + pattern
-                            let regex: NSRegularExpression
-                            if let cached = compiledPatterns[patternKey] { regex = cached }
-                            else {
-                                regex = try NSRegularExpression(pattern: pattern, options: language == "en" ? [.caseInsensitive] : [])
-                                compiledPatterns[patternKey] = regex
-                            }
-                            aliases[key] = Candidate(pattern: regex, term: effective, priority: priority)
+                            aliases[key] = Candidate(term: effective, priority: priority)
                         }
                     }
                 }
-                candidates[profile.id + ":" + language] = Array(aliases.values)
+                guard !aliases.isEmpty else { continue }
+                let ordered = aliases.keys.sorted {
+                    if $0.utf16.count != $1.utf16.count { return $0.utf16.count > $1.utf16.count }
+                    return $0 < $1
+                }
+                let alternatives = ordered.map(NSRegularExpression.escapedPattern(for:)).joined(separator: "|")
+                let pattern = language == "en"
+                    ? "(?<![\\p{L}\\p{N}_])(?:\(alternatives))(?![\\p{L}\\p{N}_])"
+                    : "(?:\(alternatives))"
+                let patternKey = language + ":" + pattern
+                let regex: NSRegularExpression
+                if let cached = compiledPatterns[patternKey] { regex = cached }
+                else {
+                    regex = try NSRegularExpression(pattern: pattern, options: language == "en" ? [.caseInsensitive] : [])
+                    compiledPatterns[patternKey] = regex
+                }
+                matchers[profile.id + ":" + language] = Matcher(pattern: regex, aliases: aliases)
             }
         }
         self.document = document
-        self.candidates = candidates
+        self.matchers = matchers
     }
 
     func plan(source: String, language: SourceLanguage, profileID: String) -> GlossaryPlan {
-        let range = NSRange(source.startIndex..<source.endIndex, in: source)
-        var found: [GlossaryMatch] = []
-        for candidate in candidates[profileID + ":" + language.code] ?? [] {
-            for match in candidate.pattern.matches(in: source, range: range) {
-                found.append(GlossaryMatch(range: match.range, source: (source as NSString).substring(with: match.range),
-                                          term: candidate.term, priority: candidate.priority))
-            }
+        guard let matcher = matchers[profileID + ":" + language.code] else {
+            return GlossaryPlan(source: source, matches: [])
         }
-        found.sort {
-            if $0.range.location != $1.range.location { return $0.range.location < $1.range.location }
-            if $0.range.length != $1.range.length { return $0.range.length > $1.range.length }
-            if $0.priority != $1.priority { return $0.priority > $1.priority }
-            return $0.term.target < $1.term.target
-        }
-        var matches: [GlossaryMatch] = []
-        var end = 0
-        for match in found where match.range.location >= end {
-            matches.append(match)
-            end = NSMaxRange(match.range)
+        let original = source as NSString
+        let range = NSRange(location: 0, length: original.length)
+        let matches = matcher.pattern.matches(in: source, range: range).compactMap { match -> GlossaryMatch? in
+            let text = original.substring(with: match.range)
+            let key = language == .english ? text.lowercased() : text
+            // ICU case folding can differ from Swift lowercasing for unusual imported aliases.
+            guard let candidate = matcher.aliases[key] ?? matcher.aliases.first(where: {
+                language == .english && $0.key.compare(text, options: .caseInsensitive) == .orderedSame
+            })?.value else { return nil }
+            return GlossaryMatch(range: match.range, source: text, term: candidate.term, priority: candidate.priority)
         }
         return GlossaryPlan(source: source, matches: matches)
     }
@@ -237,11 +241,14 @@ enum GlossaryTranslator {
     @MainActor static func translate(_ text: String, language: SourceLanguage, glossary: GameGlossary?,
                                      profileID: String, session: TranslationSession) async throws -> GlossaryTranslation {
         let plan = glossary?.plan(source: text, language: language, profileID: profileID)
+        let result: GlossaryTranslation
         if #available(macOS 26.4, *) {
-            return try await execute(text, plan: plan, plain: { try await session.translate($0).targetText },
+            result = try await execute(text, plan: plan, plain: { try await session.translate($0).targetText },
                 protected: { try await session.translate($0.attributedInput()).targetText })
+        } else {
+            result = try await execute(text, plan: plan, plain: { try await session.translate($0).targetText }, protected: nil)
         }
-        return try await execute(text, plan: plan, plain: { try await session.translate($0).targetText }, protected: nil)
+        return GlossaryTranslation(text: TranslationText.clean(result.text), notes: result.notes, usedFallback: result.usedFallback)
     }
 
     @MainActor static func execute(_ text: String, plan: GlossaryPlan?, plain: (String) async throws -> String,

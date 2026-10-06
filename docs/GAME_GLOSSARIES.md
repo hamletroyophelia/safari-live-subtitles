@@ -2,9 +2,9 @@
 
 ## 当前应用怎样使用词典
 
-LiveLingo 的识别是 Apple SpeechAnalyzer / SpeechTranscriber，翻译是 Apple Translation，均在本机运行。词典已经接入翻译流程；它约束指定术语的中文译名，不修改识别原文，也不训练模型权重。
+LiveLingo 的识别是 Apple SpeechAnalyzer / SpeechTranscriber，翻译是 Apple Translation，均在本机运行。词典已经接入翻译流程，0.6 扩充了 VTuber 与直播用语；它约束指定术语的中文译名，不修改识别原文，也不训练模型权重。
 
-控制台勾选 **游戏术语词典**，默认 **综合游戏（全部）** 同时使用所有分类，无需逐个切换。需要明确歧义词的游戏语境时，再选择单游戏。内置 `Resources/game-glossary.json` 有 112 条术语、11 个分类和综合入口，其中 91 条保护译名、21 条歧义词不强制替换。所有术语存放在同一个文件，不需要导入多份词库。综合模式遇到同一别名有不同译名或策略时，不强制替换；候选仅保存在内部诊断结果中。各游戏继承通用实况词；魂游还继承魂游通用词，具体游戏的同名条目优先。
+控制台勾选 **游戏术语词典**，默认 **综合游戏（全部）** 同时使用所有分类，无需逐个切换。需要明确歧义词的游戏语境时，再选择单游戏。内置 `Resources/game-glossary.json` 有 246 条术语、12 个分类和综合入口；短词与歧义词不强制替换。所有术语存放在同一个文件，不需要导入多份词库。综合模式遇到同一别名有不同译名或策略时，不强制替换；候选仅保存在内部诊断结果中。各游戏继承通用实况词；魂游还继承魂游通用词，具体游戏的同名条目优先。
 
 macOS 26.4 起支持 [AttributedString 的 skipsTranslation 属性](https://developer.apple.com/documentation/foundation/attributescopes/translationattributes/skipstranslation)。应用匹配原文术语后，用标记为跳过翻译的占位符发送给 Apple；返回后逐个校验占位符只出现一次，再恢复中文译名。直接保护日语或中文字符串在低延迟模型的实测中仍可能被改写，因此不能只依赖属性而不检查结果。
 
@@ -66,3 +66,22 @@ macOS 26.4 起支持 [AttributedString 的 skipsTranslation 属性](https://deve
 推荐优先维护：主播常说的操作与感叹 → 游戏机制 → 装备与技能专名 → Boss 和角色名。根据真实字幕错误逐步扩充，比一次导入巨大通用词典更容易控制效果。
 
 技术依据：[TranslationSession](https://developer.apple.com/documentation/translation/translationsession)、[SpeechTranscriber](https://developer.apple.com/documentation/speech/speechtranscriber)。
+
+
+## 0.6：Reddit / GitHub 直播与 VTuber 用语
+
+2026-10-06 核对。词库仍是一个 JSON，默认综合分类自动包含新增 VTuber 分类；也可以只选 VTuber。旧游戏 ID、旧条目、用户自定义词典和偏好不会被安装更新重置。内置增加 134 条，合计 246 条。条目的中文映射由本项目整理，原始社区文章、词库长定义或完整游戏语言资产未整库复制。新增来源与候选：
+
+| 来源 | 核对内容 | 接入方式 |
+| --- | --- | --- |
+| [Reddit：Hololive 日语入门](https://www.reddit.com/r/Hololive/comments/icgxaq/) 与 [基本词典](https://www.reddit.com/r/Hololive/comments/k2dfz8/) | 推、直播类型、角色创作及社群语境 | 核对用法后整理中文短映射，不复制全文。 |
+| [Reddit：直播标题用语](https://www.reddit.com/r/VirtualYoutubers/comments/ivb1id/) | 凸待ち、逆凸、RTA、ゲリラ、オフコラボ | 纳入综合与 VTuber 分类；RTA 按速通使用。 |
+| [Reddit：VTuber 聊天俚语](https://www.reddit.com/r/VirtualYoutubers/comments/1rkuqtv/essential_japanese_slang_for_vtuber_chats/) 与 [聊天速查](https://www.reddit.com/r/VirtualYoutubers/comments/gzrl1x/) | ポン、てぇてぇ、推等社群表达 | ポン、清楚、卒業、ママ、パパ保留为 hint，避免把普通语境误换成主播圈含义。 |
+| [Reddit：日语游戏用语](https://www.reddit.com/r/japanese/comments/zh0jmu/) 与 [Apex 日服](https://www.reddit.com/r/LearnJapanese/comments/1bd2z28/) | ロー、別パ等 FPS 实况用语 | ロー等短词不强制替换；长而明确的术语可保护。 |
+| [GitHub：heppokofrontend/hololive-dictionary](https://github.com/heppokofrontend/hololive-dictionary) | Hololive 专名、读音及 IME 词库格式 | 上游为 [NYSL 0.9982](https://github.com/heppokofrontend/hololive-dictionary/blob/main/LICENSE)；核对专名，整理少量常见主播全名与中文映射，不捆绑整个输入法词库。 |
+| [GitHub：Cj-bc/skk-vtuber-jisyo](https://github.com/Cj-bc/skk-vtuber-jisyo) | 按事务所分类的 SKK VTuber 输入法词库 | 用作查找读音的参考；上游没有明确仓库许可，未复制或打包其数据。SKK 是输入法词典，不是现成日中翻译表。 |
+| [GitHub：PrismarineJS/minecraft-data](https://github.com/PrismarineJS/minecraft-data) | Minecraft 物品、生物、版本及英文名称 | 用作核对 Minecraft 实体的参考，不捆绑完整游戏资产。新增监守者、远古城市、下界合金、潜影盒等短映射。 |
+
+新增还包括速通挑战、重生、判定、冷却、拍桌、指挥弹幕、窥屏狙击、魂游攻击机制等。词库为起步整理，并非覆盖所有主播、梗或游戏版本。名称仍需实际语境核对；例如英文 clip 同时可能指切片或游戏弹匣，因此只作提示。
+
+0.6 用每分类/语言的一次最长优先字面匹配代替对每个别名各扫一遍，并保留继承、英文 Unicode 边界与冲突策略。相同文字译文仅在本次固定语言和词库的会话中缓存，最多 64 项及约 64 KiB 文本载荷；没有持久化、联网同步或模型训练。失败回退不缓存。切换语言、分类或重启会话会重建缓存。

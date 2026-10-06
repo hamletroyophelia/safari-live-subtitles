@@ -4,9 +4,15 @@ import Translation
 @main struct GlossaryTests {
     @MainActor static func main() async throws {
         let glossary = try GameGlossary(data: Data(contentsOf: URL(fileURLWithPath: "Resources/game-glossary.json")))
-        precondition(glossary.profiles.count == 12)
+        precondition(glossary.profiles.count == 13)
         let combined = glossary.plan(source: "クリーパー、戦灰、忍殺、ヘッドショット、対空", language: .japanese, profileID: "all_games")
         precondition(combined.tokens.count == 5, "one combined profile must cover all game genres")
+        let stream = glossary.plan(source: "箱推し、推し活、歌枠、スパチャ、星街すいせい。", language: .japanese, profileID: "all_games")
+        precondition(stream.tokens.count == 5 && stream.matches.map(\.term.target) == ["团推", "推活", "歌回", "醒目留言", "星街彗星"])
+        let ambiguous = glossary.plan(source: "ママ、パパ、卒業、清楚、ポン。", language: .japanese, profileID: "all_games")
+        precondition(ambiguous.matches.count == 5 && ambiguous.tokens.isEmpty, "ambiguous VTuber words must not force a translation")
+        let streamingEnglish = glossary.plan(source: "SUPER CHAT, Superchat, Hoshimachi Suisei. clipperish, super chatting", language: .english, profileID: "all_games")
+        precondition(streamingEnglish.tokens.count == 3)
         let conflict = glossary.plan(source: "中段", language: .japanese, profileID: "all_games")
         precondition(conflict.tokens.isEmpty && conflict.matches[0].term.target.contains("中段攻击") && conflict.matches[0].term.target.contains("中段架势"), "cross-game conflicts must be hints")
         let japanese = glossary.plan(source: "😀クリーパーとクリーパー。ネザーでレッドストーンを探す。", language: .japanese, profileID: "minecraft")

@@ -65,7 +65,7 @@ final class AppModel: ObservableObject {
     private var meterTask: Task<Void, Never>?
     private var demoTask: Task<Void, Never>?
     private var lastAudioTime = Date.distantPast
-    private var lastPartialTranslationTime = Date.distantPast
+    private var partialSchedule = PartialTranslationSchedule()
     private var pendingPartial: Caption?
     private var modelsOnly = false
     private var trialText: String?
@@ -225,6 +225,7 @@ final class AppModel: ObservableObject {
         detail = "仅处理输入文字，不读取 Safari 声音。"
         let (stream, continuation) = AsyncStream<Void>.makeStream(bufferingPolicy: .bufferingNewest(1))
         translationBacklog = TranslationBacklog()
+        partialSchedule = PartialTranslationSchedule()
         lastEnqueuedJob = nil
         translationStream = stream
         translationInput = continuation
@@ -249,6 +250,7 @@ final class AppModel: ObservableObject {
         translationSeconds = nil
         let (stream, continuation) = AsyncStream<Void>.makeStream(bufferingPolicy: .bufferingNewest(1))
         translationBacklog = TranslationBacklog()
+        partialSchedule = PartialTranslationSchedule()
         lastEnqueuedJob = nil
         translationStream = stream
         translationInput = continuation
@@ -268,6 +270,7 @@ final class AppModel: ObservableObject {
         detail = "仅下载和加载模型，不读取 Safari 声音。"
         let (stream, continuation) = AsyncStream<Void>.makeStream(bufferingPolicy: .bufferingNewest(1))
         translationBacklog = TranslationBacklog()
+        partialSchedule = PartialTranslationSchedule()
         lastEnqueuedJob = nil
         translationStream = stream
         translationInput = continuation
@@ -301,11 +304,11 @@ final class AppModel: ObservableObject {
         let activeProfile = glossaryProfileID
         let activeLanguage = language
         do {
-            phase = "准备中文翻译模型…"
-            try await session.prepareTranslation()
-            try Task.checkCancellation()
-            guard run == generation else { return }
             if let text = trialText {
+                phase = "准备中文翻译模型…"
+                try await session.prepareTranslation()
+                try Task.checkCancellation()
+                guard run == generation else { return }
                 let result = try await GlossaryTranslator.translate(text, language: activeLanguage,
                     glossary: activeGlossary, profileID: activeProfile, session: session)
                 try Task.checkCancellation()
@@ -341,7 +344,13 @@ final class AppModel: ObservableObject {
             speech.onError = { [weak self] error in
                 guard let self, self.generation == run else { return }; self.fail(error)
             }
-            let (format, input) = try await speech.prepare(language: language)
+            // Prepare both independent models together instead of adding their startup times.
+            async let preparedSpeech = speech.prepare(language: activeLanguage)
+            phase = "准备本地识别与翻译…"
+            try await session.prepareTranslation()
+            try Task.checkCancellation()
+            guard run == generation else { return }
+            let (format, input) = try await preparedSpeech
             try Task.checkCancellation()
             guard run == generation else { return }
             if modelsOnly {
@@ -387,19 +396,30 @@ final class AppModel: ObservableObject {
             lastAudioTime = Date()
             setOverlay(visible: true)
             startMeterMonitor(run: run)
+            var memo = TranslationMemo()
             for await _ in jobs {
-              while run == generation, let job = translationBacklog.pop() {
+              while run == generation, let waiting = translationBacklog.pop() {
                 try Task.checkCancellation()
-                guard run == generation, job.generation == run else { continue }
-                // Skip outdated partial revisions before spending translation time on them.
-                guard store.isApplicable(job) else { continue }
-                let begun = Date()
-                let response = try await GlossaryTranslator.translate(job.text, language: activeLanguage,
-                    glossary: activeGlossary, profileID: activeProfile, session: session)
+                guard waiting.generation == run, let job = store.latestJob(for: waiting) else { continue }
+                let begun = ProcessInfo.processInfo.systemUptime
+                let response: GlossaryTranslation
+                let elapsed: Double
+                if let cached = memo.result(for: job.text) {
+                    response = cached; elapsed = 0
+                } else {
+                    response = try await GlossaryTranslator.translate(job.text, language: activeLanguage,
+                        glossary: activeGlossary, profileID: activeProfile, session: session)
+                    elapsed = ProcessInfo.processInfo.systemUptime - begun
+                    try Task.checkCancellation()
+                    guard run == generation else { return }
+                    memo.insert(response, for: job.text)
+                    partialSchedule.completed(seconds: elapsed)
+                }
                 guard run == generation else { return }
                 if store.applyTranslation(response.text, for: job, notes: response.notes, usedFallback: response.usedFallback) {
                     publishCaptions()
-                    translationSeconds = Date().timeIntervalSince(begun)
+                    let rounded = (elapsed * 100).rounded() / 100
+                    if translationSeconds != rounded { translationSeconds = rounded }
                     let nextDetail = "\(language.title)原文与中文译文同步显示"
                     if detail != nextDetail { detail = nextDetail }
                 }
@@ -422,13 +442,13 @@ final class AppModel: ObservableObject {
             // Throttle rather than debounce: continuous speech must not starve translation.
             guard debounceTask == nil else { return }
             let run = generation
-            let delay = max(0.02, 0.3 - Date().timeIntervalSince(lastPartialTranslationTime))
+            let delay = partialSchedule.delay(now: ProcessInfo.processInfo.systemUptime)
             debounceTask = Task { [weak self] in
                 try? await Task.sleep(for: .seconds(delay))
                 guard !Task.isCancelled, let self, self.generation == run else { return }
                 if let pending = self.pendingPartial { self.enqueue(pending) }
                 self.pendingPartial = nil
-                self.lastPartialTranslationTime = Date()
+                self.partialSchedule.enqueued(now: ProcessInfo.processInfo.systemUptime)
                 self.debounceTask = nil
             }
         }
@@ -471,6 +491,7 @@ final class AppModel: ObservableObject {
         translationInput = nil
         translationStream = nil
         translationBacklog = TranslationBacklog()
+        partialSchedule = PartialTranslationSchedule()
         lastEnqueuedJob = nil
         translationConfiguration = nil
         debounceTask?.cancel(); debounceTask = nil

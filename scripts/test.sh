@@ -12,3 +12,6 @@ build/glossary-tests
 xcrun swiftc -parse-as-library -module-cache-path "$project_dir/build/module-cache" \
     Sources/PCMConverter.swift Tests/AudioTests.swift -o build/audio-tests
 build/audio-tests
+xcrun swiftc -parse-as-library -module-cache-path "$project_dir/build/module-cache" \
+    Sources/Captions.swift Sources/GameGlossary.swift Sources/LiveScheduling.swift Tests/SchedulingTests.swift -o build/scheduling-tests
+build/scheduling-tests

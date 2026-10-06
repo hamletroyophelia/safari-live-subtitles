@@ -16,7 +16,8 @@
         "lies_of_p",
         "nioh",
         "lords_of_the_fallen",
-        "minecraft"
+        "minecraft",
+        "vtuber"
       ],
       "resolveConflicts": "hint",
       "terms": []
@@ -142,6 +143,433 @@
             "buff"
           ],
           "zh-Hans": "增强",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "ゲーム実況"
+          ],
+          "en": [
+            "game commentary",
+            "gameplay commentary"
+          ],
+          "zh-Hans": "游戏实况",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "初見さん"
+          ],
+          "en": [
+            "first-time viewer",
+            "first-time viewers"
+          ],
+          "zh-Hans": "新来的观众",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "初見殺し"
+          ],
+          "en": [
+            "beginner trap"
+          ],
+          "zh-Hans": "初见杀",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "縛り"
+          ],
+          "en": [
+            "challenge restriction"
+          ],
+          "zh-Hans": "限制条件",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "リスポーン"
+          ],
+          "en": [
+            "respawn",
+            "respawning"
+          ],
+          "zh-Hans": "重生",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "チェックポイント"
+          ],
+          "en": [
+            "checkpoint",
+            "checkpoints"
+          ],
+          "zh-Hans": "检查点",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "セーブポイント"
+          ],
+          "en": [
+            "save point",
+            "save points"
+          ],
+          "zh-Hans": "存档点",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ロード画面"
+          ],
+          "en": [
+            "loading screen"
+          ],
+          "zh-Hans": "加载画面",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "チュートリアル"
+          ],
+          "en": [
+            "tutorial",
+            "tutorials"
+          ],
+          "zh-Hans": "教程",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "カットシーン"
+          ],
+          "en": [
+            "cutscene",
+            "cutscenes"
+          ],
+          "zh-Hans": "过场动画",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "スキルツリー"
+          ],
+          "en": [
+            "skill tree",
+            "skill trees"
+          ],
+          "zh-Hans": "技能树",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "クールダウン"
+          ],
+          "en": [
+            "cooldown",
+            "cooldowns"
+          ],
+          "zh-Hans": "冷却时间",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ダメージ判定"
+          ],
+          "en": [
+            "hit detection"
+          ],
+          "zh-Hans": "伤害判定",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "当たり判定"
+          ],
+          "en": [
+            "hitbox",
+            "hitboxes"
+          ],
+          "zh-Hans": "碰撞判定",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "協力プレイ"
+          ],
+          "en": [
+            "co-op",
+            "cooperative play"
+          ],
+          "zh-Hans": "合作游玩",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ソロプレイ"
+          ],
+          "en": [
+            "solo play"
+          ],
+          "zh-Hans": "单人游玩",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "マルチプレイ"
+          ],
+          "en": [
+            "multiplayer"
+          ],
+          "zh-Hans": "多人游玩",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "フレンドリーファイア"
+          ],
+          "en": [
+            "friendly fire"
+          ],
+          "zh-Hans": "友军伤害",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "リセマラ"
+          ],
+          "en": [
+            "rerolling"
+          ],
+          "zh-Hans": "刷初始",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ガチャ"
+          ],
+          "en": [
+            "gacha"
+          ],
+          "zh-Hans": "抽卡",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "天井"
+          ],
+          "en": [
+            "pity"
+          ],
+          "zh-Hans": "保底",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "ドロップ率"
+          ],
+          "en": [
+            "drop rate",
+            "drop rates"
+          ],
+          "zh-Hans": "掉落率",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "レアドロップ"
+          ],
+          "en": [
+            "rare drop",
+            "rare drops"
+          ],
+          "zh-Hans": "稀有掉落",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "経験値"
+          ],
+          "en": [
+            "experience points"
+          ],
+          "zh-Hans": "经验值",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "レベル上げ"
+          ],
+          "en": [
+            "level grinding"
+          ],
+          "zh-Hans": "练级",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "スピードラン",
+            "RTA"
+          ],
+          "en": [
+            "speedrun",
+            "speedruns",
+            "RTA"
+          ],
+          "zh-Hans": "速通",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "自己ベスト"
+          ],
+          "en": [
+            "personal best",
+            "PB"
+          ],
+          "zh-Hans": "个人最佳纪录",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ノーダメージ"
+          ],
+          "en": [
+            "no damage",
+            "no-damage"
+          ],
+          "zh-Hans": "无伤",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ノーヒット"
+          ],
+          "en": [
+            "no hit",
+            "no-hit"
+          ],
+          "zh-Hans": "无受击",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ノーデス"
+          ],
+          "en": [
+            "deathless",
+            "no death",
+            "no-death"
+          ],
+          "zh-Hans": "不死通关",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "リセット"
+          ],
+          "en": [
+            "reset"
+          ],
+          "zh-Hans": "重置",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "耐久配信"
+          ],
+          "en": [
+            "endurance stream",
+            "marathon stream"
+          ],
+          "zh-Hans": "耐久直播",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "指示厨"
+          ],
+          "en": [
+            "backseat gamer",
+            "backseat gamers"
+          ],
+          "zh-Hans": "指挥型观众",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "指示コメ"
+          ],
+          "en": [
+            "backseating",
+            "backseat gaming"
+          ],
+          "zh-Hans": "指挥弹幕",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ゴースティング"
+          ],
+          "en": [
+            "stream sniping"
+          ],
+          "zh-Hans": "窥屏狙击",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "台パン"
+          ],
+          "en": [
+            "desk slam",
+            "desk slamming"
+          ],
+          "zh-Hans": "拍桌",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "萎え落ち"
+          ],
+          "en": [
+            "rage quit",
+            "rage quitting"
+          ],
+          "zh-Hans": "恼怒退场",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "詰んだ"
+          ],
+          "en": [
+            "softlock",
+            "softlocked"
+          ],
+          "zh-Hans": "卡死了",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "クリア"
+          ],
+          "en": [
+            "clear"
+          ],
+          "zh-Hans": "通关",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "GG"
+          ],
+          "en": [
+            "GG"
+          ],
+          "zh-Hans": "打得好",
           "mode": "hint"
         }
       ],
@@ -289,6 +717,66 @@
             "mind game"
           ],
           "zh-Hans": "博弈",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "ヒット確認"
+          ],
+          "en": [
+            "hit confirm"
+          ],
+          "zh-Hans": "命中确认",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "置き技"
+          ],
+          "en": [
+            "preemptive poke"
+          ],
+          "zh-Hans": "预置招式",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "差し合い"
+          ],
+          "en": [
+            "footsies"
+          ],
+          "zh-Hans": "立回",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "空振り"
+          ],
+          "en": [
+            "whiff"
+          ],
+          "zh-Hans": "挥空",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "ガード崩し"
+          ],
+          "en": [
+            "guard break"
+          ],
+          "zh-Hans": "破防",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "キャンセル"
+          ],
+          "en": [
+            "cancel"
+          ],
+          "zh-Hans": "取消",
           "mode": "hint"
         }
       ],
@@ -439,6 +927,166 @@
           ],
           "zh-Hans": "拆包",
           "mode": "hint"
+        },
+        {
+          "ja": [
+            "別パ"
+          ],
+          "en": [
+            "third party",
+            "third-partying"
+          ],
+          "zh-Hans": "第三队劝架",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "漁夫"
+          ],
+          "en": [
+            "third-party fight"
+          ],
+          "zh-Hans": "劝架",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "めっちゃロー",
+            "めちゃロー"
+          ],
+          "en": [
+            "one HP",
+            "one shot"
+          ],
+          "zh-Hans": "大残",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "ロー"
+          ],
+          "en": [
+            "low HP"
+          ],
+          "zh-Hans": "残血",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "アーマー割った",
+            "アーマーを割った"
+          ],
+          "en": [
+            "cracked armor",
+            "armor cracked"
+          ],
+          "zh-Hans": "破甲了",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "アーマースワップ"
+          ],
+          "en": [
+            "armor swap"
+          ],
+          "zh-Hans": "换甲",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ノックダウン"
+          ],
+          "en": [
+            "knockdown",
+            "knocked down"
+          ],
+          "zh-Hans": "击倒",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "確キル"
+          ],
+          "en": [
+            "finish the downed enemy"
+          ],
+          "zh-Hans": "补掉倒地敌人",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "蘇生"
+          ],
+          "en": [
+            "revive",
+            "reviving"
+          ],
+          "zh-Hans": "复活",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "ハイグラ"
+          ],
+          "en": [
+            "high ground"
+          ],
+          "zh-Hans": "高点",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "射線"
+          ],
+          "en": [
+            "line of sight"
+          ],
+          "zh-Hans": "枪线",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "デスボックス"
+          ],
+          "en": [
+            "death box",
+            "death boxes"
+          ],
+          "zh-Hans": "死亡箱",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "チャンピオン"
+          ],
+          "en": [
+            "champion"
+          ],
+          "zh-Hans": "冠军",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "漁る"
+          ],
+          "en": [
+            "loot",
+            "looting"
+          ],
+          "zh-Hans": "搜物资",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "プリファイア"
+          ],
+          "en": [
+            "prefire",
+            "pre-firing"
+          ],
+          "zh-Hans": "提前开枪",
+          "mode": "protect"
         }
       ],
       "title": "FPS",
@@ -568,6 +1216,108 @@
             "New Game Plus"
           ],
           "zh-Hans": "二周目",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "致命の一撃"
+          ],
+          "en": [
+            "critical attack"
+          ],
+          "zh-Hans": "致命一击",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "落下攻撃"
+          ],
+          "en": [
+            "plunging attack"
+          ],
+          "zh-Hans": "下落攻击",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ジャンプ攻撃"
+          ],
+          "en": [
+            "jump attack"
+          ],
+          "zh-Hans": "跳跃攻击",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "強攻撃"
+          ],
+          "en": [
+            "heavy attack"
+          ],
+          "zh-Hans": "重攻击",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "弱攻撃"
+          ],
+          "en": [
+            "light attack"
+          ],
+          "zh-Hans": "轻攻击",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "スリップダメージ"
+          ],
+          "en": [
+            "damage over time",
+            "DoT"
+          ],
+          "zh-Hans": "持续伤害",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ステ振り"
+          ],
+          "en": [
+            "stat allocation"
+          ],
+          "zh-Hans": "加点",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "レベル縛り"
+          ],
+          "en": [
+            "level restriction"
+          ],
+          "zh-Hans": "等级限制",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "武器強化"
+          ],
+          "en": [
+            "weapon upgrade",
+            "weapon upgrades"
+          ],
+          "zh-Hans": "强化武器",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ボスラッシュ"
+          ],
+          "en": [
+            "boss rush"
+          ],
+          "zh-Hans": "连续挑战首领",
           "mode": "protect"
         }
       ],
@@ -1248,11 +1998,675 @@
           ],
           "zh-Hans": "刷怪设施",
           "mode": "hint"
+        },
+        {
+          "ja": [
+            "ウォーデン"
+          ],
+          "en": [
+            "Warden"
+          ],
+          "zh-Hans": "监守者",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "古代都市"
+          ],
+          "en": [
+            "Ancient City"
+          ],
+          "zh-Hans": "远古城市",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ネザライト"
+          ],
+          "en": [
+            "Netherite"
+          ],
+          "zh-Hans": "下界合金",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "トーテム",
+            "不死のトーテム"
+          ],
+          "en": [
+            "Totem of Undying"
+          ],
+          "zh-Hans": "不死图腾",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "シュルカーボックス"
+          ],
+          "en": [
+            "Shulker Box",
+            "Shulker Boxes"
+          ],
+          "zh-Hans": "潜影盒",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ホッパー"
+          ],
+          "en": [
+            "Hopper",
+            "Hoppers"
+          ],
+          "zh-Hans": "漏斗",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ピストン"
+          ],
+          "en": [
+            "Piston",
+            "Pistons"
+          ],
+          "zh-Hans": "活塞",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "オブザーバー"
+          ],
+          "en": [
+            "Observer",
+            "Observers"
+          ],
+          "zh-Hans": "侦测器",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "アイアンゴーレム"
+          ],
+          "en": [
+            "Iron Golem",
+            "Iron Golems"
+          ],
+          "zh-Hans": "铁傀儡",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "交易"
+          ],
+          "en": [
+            "trading"
+          ],
+          "zh-Hans": "交易",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "自動化"
+          ],
+          "en": [
+            "automation"
+          ],
+          "zh-Hans": "自动化",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "整地"
+          ],
+          "en": [
+            "terrain clearing"
+          ],
+          "zh-Hans": "整地",
+          "mode": "protect"
         }
       ],
       "title": "Minecraft",
       "inherits": [
         "common"
+      ]
+    },
+    {
+      "id": "vtuber",
+      "title": "VTuber / 直播用语",
+      "inherits": [
+        "common"
+      ],
+      "terms": [
+        {
+          "ja": [
+            "VTuber",
+            "Vチューバー",
+            "バーチャルユーチューバー"
+          ],
+          "en": [
+            "VTuber",
+            "VTubers",
+            "virtual YouTuber"
+          ],
+          "zh-Hans": "虚拟主播",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "雑談"
+          ],
+          "en": [
+            "zatsudan",
+            "chatting stream"
+          ],
+          "zh-Hans": "杂谈",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "歌枠"
+          ],
+          "en": [
+            "utawaku",
+            "karaoke stream"
+          ],
+          "zh-Hans": "歌回",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "コラボ"
+          ],
+          "en": [
+            "collab",
+            "collaboration stream"
+          ],
+          "zh-Hans": "联动",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "オフコラボ"
+          ],
+          "en": [
+            "offline collab",
+            "off-collab"
+          ],
+          "zh-Hans": "线下联动",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "凸待ち"
+          ],
+          "en": [
+            "call-in stream"
+          ],
+          "zh-Hans": "等人来电联动",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "逆凸"
+          ],
+          "en": [
+            "reverse call-in"
+          ],
+          "zh-Hans": "主动打电话联动",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ゲリラ配信"
+          ],
+          "en": [
+            "guerrilla stream",
+            "unannounced stream"
+          ],
+          "zh-Hans": "突击直播",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "切り抜き"
+          ],
+          "en": [
+            "clip",
+            "clips"
+          ],
+          "zh-Hans": "切片",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "切り抜き師"
+          ],
+          "en": [
+            "clipper",
+            "clippers"
+          ],
+          "zh-Hans": "切片作者",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "スーパーチャット",
+            "スパチャ"
+          ],
+          "en": [
+            "super chat",
+            "Superchat"
+          ],
+          "zh-Hans": "醒目留言",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "メンバーシップ"
+          ],
+          "en": [
+            "channel membership"
+          ],
+          "zh-Hans": "频道会员",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "メン限"
+          ],
+          "en": [
+            "members-only",
+            "member-only"
+          ],
+          "zh-Hans": "会员限定",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "収益化"
+          ],
+          "en": [
+            "monetization"
+          ],
+          "zh-Hans": "开通收益",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "案件配信"
+          ],
+          "en": [
+            "sponsored stream"
+          ],
+          "zh-Hans": "商单直播",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "案件"
+          ],
+          "en": [
+            "sponsorship"
+          ],
+          "zh-Hans": "商单",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "推し活"
+          ],
+          "en": [
+            "oshi activities"
+          ],
+          "zh-Hans": "推活",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "最推し"
+          ],
+          "en": [
+            "main oshi"
+          ],
+          "zh-Hans": "最喜欢的主播",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "箱推し"
+          ],
+          "en": [
+            "hako-oshi",
+            "hako oshi"
+          ],
+          "zh-Hans": "团推",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "単推し"
+          ],
+          "en": [
+            "solo oshi"
+          ],
+          "zh-Hans": "单推",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "推し"
+          ],
+          "en": [
+            "oshi"
+          ],
+          "zh-Hans": "推",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "てぇてぇ",
+            "てえてえ",
+            "てぇてえ"
+          ],
+          "en": [
+            "teetee"
+          ],
+          "zh-Hans": "好甜",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ポンコツ"
+          ],
+          "en": [
+            "ponkotsu"
+          ],
+          "zh-Hans": "笨手笨脚",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ポン"
+          ],
+          "en": [
+            "pon"
+          ],
+          "zh-Hans": "冒失",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "清楚"
+          ],
+          "en": [
+            "seiso"
+          ],
+          "zh-Hans": "清楚系",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "ガチ恋勢"
+          ],
+          "en": [
+            "gachikoi fan"
+          ],
+          "zh-Hans": "真爱粉",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ガチ恋"
+          ],
+          "en": [
+            "gachikoi"
+          ],
+          "zh-Hans": "真情实感地喜欢",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "ママ"
+          ],
+          "en": [
+            "mama"
+          ],
+          "zh-Hans": "角色画师",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "パパ"
+          ],
+          "en": [
+            "papa"
+          ],
+          "zh-Hans": "模型绑定师",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "立ち絵"
+          ],
+          "en": [
+            "character illustration"
+          ],
+          "zh-Hans": "立绘",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "新衣装"
+          ],
+          "en": [
+            "new outfit"
+          ],
+          "zh-Hans": "新衣装",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "お披露目"
+          ],
+          "en": [
+            "reveal"
+          ],
+          "zh-Hans": "首次展示",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "待機所"
+          ],
+          "en": [
+            "waiting room"
+          ],
+          "zh-Hans": "直播等候室",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "アーカイブ"
+          ],
+          "en": [
+            "stream archive",
+            "VOD",
+            "VODs"
+          ],
+          "zh-Hans": "直播回放",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "同接"
+          ],
+          "en": [
+            "concurrent viewers"
+          ],
+          "zh-Hans": "同时在线人数",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "初配信"
+          ],
+          "en": [
+            "debut stream"
+          ],
+          "zh-Hans": "首播",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "周年配信"
+          ],
+          "en": [
+            "anniversary stream"
+          ],
+          "zh-Hans": "周年直播",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "卒業"
+          ],
+          "en": [
+            "graduation"
+          ],
+          "zh-Hans": "毕业",
+          "mode": "hint"
+        },
+        {
+          "ja": [
+            "ホロライブ"
+          ],
+          "en": [
+            "hololive"
+          ],
+          "zh-Hans": "hololive",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ホロスターズ"
+          ],
+          "en": [
+            "HOLOSTARS"
+          ],
+          "zh-Hans": "HOLOSTARS",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "にじさんじ"
+          ],
+          "en": [
+            "Nijisanji"
+          ],
+          "zh-Hans": "彩虹社",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "ぶいすぽっ"
+          ],
+          "en": [
+            "VSPO"
+          ],
+          "zh-Hans": "VSPO",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "星街すいせい"
+          ],
+          "en": [
+            "Hoshimachi Suisei"
+          ],
+          "zh-Hans": "星街彗星",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "白上フブキ"
+          ],
+          "en": [
+            "Shirakami Fubuki"
+          ],
+          "zh-Hans": "白上吹雪",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "兎田ぺこら"
+          ],
+          "en": [
+            "Usada Pekora"
+          ],
+          "zh-Hans": "兔田佩克拉",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "さくらみこ"
+          ],
+          "en": [
+            "Sakura Miko"
+          ],
+          "zh-Hans": "樱巫女",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "宝鐘マリン"
+          ],
+          "en": [
+            "Houshou Marine"
+          ],
+          "zh-Hans": "宝钟玛琳",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "大空スバル"
+          ],
+          "en": [
+            "Oozora Subaru"
+          ],
+          "zh-Hans": "大空昴",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "戌神ころね"
+          ],
+          "en": [
+            "Inugami Korone"
+          ],
+          "zh-Hans": "戌神沁音",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "猫又おかゆ"
+          ],
+          "en": [
+            "Nekomata Okayu"
+          ],
+          "zh-Hans": "猫又小粥",
+          "mode": "protect"
+        },
+        {
+          "ja": [
+            "葛葉"
+          ],
+          "en": [
+            "Kuzuha"
+          ],
+          "zh-Hans": "葛叶",
+          "mode": "protect"
+        }
       ]
     }
   ]

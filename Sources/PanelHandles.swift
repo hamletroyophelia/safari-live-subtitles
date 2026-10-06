@@ -3,7 +3,7 @@ import SwiftUI
 
 /// Explicit native drag surfaces avoid SwiftUI text swallowing window gestures.
 struct PanelHandle: NSViewRepresentable {
-    enum Kind { case move, resize }
+    enum Kind: Equatable { case move, resize }
     let kind: Kind
     var onResize: () -> Void = {}
 
@@ -17,9 +17,8 @@ struct PanelHandle: NSViewRepresentable {
         return view
     }
     func updateNSView(_ view: PanelHandleView, context: Context) {
-        view.kind = kind
+        if view.kind != kind { view.kind = kind; view.needsDisplay = true }
         view.onResize = onResize
-        view.needsDisplay = true
     }
 }
 
@@ -36,6 +35,10 @@ final class PanelHandleView: NSView {
     }
 
     override func draw(_ dirtyRect: NSRect) {
+        // A fully clear window pixel is not a macOS mouse target. Keep just the
+        // handles visible even when the subtitle background is 0% opaque.
+        NSColor.black.withAlphaComponent(0.48).setFill()
+        NSBezierPath(roundedRect: bounds.insetBy(dx: 0.5, dy: 0.5), xRadius: 5, yRadius: 5).fill()
         guard kind == .resize else { return }
         NSColor.white.withAlphaComponent(0.5).setStroke()
         let path = NSBezierPath()

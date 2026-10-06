@@ -149,6 +149,15 @@ struct CaptionStore {
         return caption.source.hasPrefix(job.text) && job.text.count >= caption.translatedSource.count
     }
 
+    /// Refresh a waiting job at consumption time, including corrected source text.
+    func latestJob(for job: TranslationJob) -> TranslationJob? {
+        guard let i = index(for: job) else { return nil }
+        let caption = items[i]
+        guard caption.translatedSource != caption.source else { return nil }
+        return TranslationJob(id: caption.id, revision: caption.revision,
+                              text: caption.source, generation: job.generation)
+    }
+
     static func timestamp(_ seconds: Double) -> String {
         let ms = max(0, Int((seconds * 1000).rounded()))
         return String(format: "%02d:%02d:%02d,%03d", ms / 3_600_000,
@@ -169,10 +178,14 @@ enum CaptionDisplay {
         caption.termNotes.map { "\($0.applied ? "词典" : "对照")：\($0.source)→\($0.target)" }.joined(separator: " · ")
     }
     static func tail(_ text: String, limit: Int) -> String {
-        guard text.count > limit else { return text }
-        var suffix = String(text.suffix(max(1, limit)))
+        guard let start = text.index(text.endIndex, offsetBy: -max(1, limit), limitedBy: text.startIndex),
+              start > text.startIndex else { return text }
+        var suffix = String(text[start...])
         // Avoid showing a cut English word. CJK characters can wrap independently.
-        if suffix.first?.isASCII == true, let space = suffix.firstIndex(of: " "),
+        let before = text[text.index(before: start)]
+        if before.isASCII && (before.isLetter || before.isNumber),
+           suffix.first?.isASCII == true, suffix.first?.isLetter == true,
+           let space = suffix.firstIndex(of: " "),
            suffix.distance(from: suffix.startIndex, to: space) < 18 {
             suffix = String(suffix[suffix.index(after: space)...])
         }
@@ -184,5 +197,16 @@ enum CaptionDisplay {
     }
     static func target(_ caption: Caption, width: Double, fontSize: Double) -> String {
         tail(caption.translation, limit: max(4, Int((width - 48) / fontSize * 2.5)))
+    }
+}
+
+enum TranslationText {
+    // Native protected translations sometimes insert a space on both sides of a marker.
+    // Keep English word spacing and line breaks; remove only Chinese typography gaps.
+    private static let gaps = try! NSRegularExpression(pattern:
+        "(?<=[\\p{Han}])[ \\t]+(?=[\\p{Han}，。！？、；：])|(?<=[，。！？、；：])[ \\t]+(?=[\\p{Han}])")
+    static func clean(_ text: String) -> String {
+        gaps.stringByReplacingMatches(in: text, range: NSRange(text.startIndex..<text.endIndex, in: text), withTemplate: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

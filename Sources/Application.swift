@@ -18,8 +18,14 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
     private var mainWindow: NSWindow!
     private var overlay: SubtitlePanel!
     private var statusItem: NSStatusItem!
+    private var subtitlePresentation: SubtitlePresentation!
     private var overlaySubscriptions = Set<AnyCancellable>()
     private var fittingOverlay = false
+    private var fittedCaptionID: UUID?
+    private var fittedStyle: SubtitleStyle?
+    private var fittedWidth = 0.0
+    private var fittedSize = 0.0
+    private let layoutManager = NSLayoutManager()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         if let iconURL = Bundle.main.url(forResource: "AppIcon", withExtension: "icns"),
@@ -48,15 +54,19 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
         overlay.collectionBehavior = [.canJoinAllSpaces, .canJoinAllApplications, .fullScreenAuxiliary, .stationary, .ignoresCycle]
         overlay.isOpaque = false
         overlay.backgroundColor = .clear
-        overlay.hasShadow = true
+        overlay.hasShadow = model.backgroundOpacity > 0.01
         overlay.hidesOnDeactivate = false
         overlay.isMovableByWindowBackground = false
         overlay.minSize = NSSize(width: 440, height: 105)
         overlay.isReleasedWhenClosed = false
         overlay.delegate = self
-        let hostingView = DraggableHostingView(rootView: OverlayView(model: model))
+        subtitlePresentation = SubtitlePresentation(model: model)
+        let hostingView = DraggableHostingView(rootView: OverlayView(model: model, presentation: subtitlePresentation))
         hostingView.sizingOptions = []
         overlay.contentView = hostingView
+        model.$backgroundOpacity.removeDuplicates()
+            .sink { [weak self] in self?.overlay.hasShadow = $0 > 0.01 }
+            .store(in: &overlaySubscriptions)
         Publishers.CombineLatest4(model.$fontSize, model.$overlayWidth, model.$overlayAutoHeight, model.$subtitleStyle)
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.fitOverlayHeight() }
@@ -136,7 +146,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
             let font = style.fontDesign.nativeFont(size: size, weight: weight)
             let bounds = (text as NSString).boundingRect(with: NSSize(width: width, height: 1000),
                 options: [.usesLineFragmentOrigin, .usesFontLeading], attributes: [.font: font])
-            let lineHeight = NSLayoutManager().defaultLineHeight(for: font)
+            let lineHeight = layoutManager.defaultLineHeight(for: font)
             return min(ceil(bounds.height) + 3, ceil(lineHeight * 3))
         }
         let height: Double
@@ -145,14 +155,22 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSWindowDelega
         } else if let caption = model.current {
             let source = CaptionDisplay.source(caption, width: overlay.frame.width, fontSize: style.sourceFontSize)
             let target = caption.translation.isEmpty ? "正在翻译…" : CaptionDisplay.target(caption, width: overlay.frame.width, fontSize: model.fontSize)
-            height = 62 + (style.showSource ? style.spacing + textHeight(source, size: style.sourceFontSize, weight: style.sourceWeight) : 0)
+            height = 68 + (style.showSource ? style.spacing + textHeight(source, size: style.sourceFontSize, weight: style.sourceWeight) : 0)
                 + textHeight(target, size: model.fontSize, weight: style.targetWeight)
         } else {
             height = max(118, model.fontSize + 86)
         }
         var frame = overlay.frame
         let visible = (overlay.screen ?? NSScreen.main)?.visibleFrame
-        let fittedHeight = min(model.overlayAutoHeight ? 480 : 900, max(overlay.minSize.height, ceil(height)))
+        var fittedHeight = min(model.overlayAutoHeight ? 480 : 900, max(overlay.minSize.height, ceil(height)))
+        if model.overlayAutoHeight, let id = model.current?.id {
+            // Revisions of one sentence should not make the panel bounce up and down.
+            if fittedCaptionID == id, fittedStyle == style, fittedWidth == overlay.frame.width, fittedSize == model.fontSize {
+                fittedHeight = max(frame.height, fittedHeight)
+            }
+            fittedCaptionID = id; fittedStyle = style
+            fittedWidth = overlay.frame.width; fittedSize = model.fontSize
+        } else { fittedCaptionID = nil; fittedStyle = nil }
         guard abs(frame.height - fittedHeight) > 1 else { return }
         frame.size.height = fittedHeight
         if let visible {

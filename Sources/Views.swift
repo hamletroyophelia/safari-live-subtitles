@@ -23,7 +23,7 @@ struct MainView: View {
                 Text("·").foregroundStyle(.secondary)
                 Text("无需 YouTube CC")
                 Spacer()
-                Text("LiveLingo 0.5").foregroundStyle(.secondary)
+                Text("LiveLingo 0.6").foregroundStyle(.secondary)
             }.font(.system(size: 11)).foregroundStyle(.secondary)
         }
         .padding(28)
@@ -196,15 +196,7 @@ struct MainView: View {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 16) {
                         ForEach(model.captions.suffix(80).reversed()) { caption in
-                            VStack(alignment: .leading, spacing: 6) {
-                                HStack {
-                                    Text(CaptionStore.timestamp(caption.start).prefix(8)).font(.system(size: 9, design: .monospaced))
-                                    if !caption.isFinal { Text("识别中").font(.system(size: 9)) }
-                                }.foregroundStyle(.tertiary)
-                                Text(caption.source).font(.system(size: 13)).foregroundStyle(.secondary)
-                                Text(caption.translation.isEmpty ? "正在翻译…" : caption.translation)
-                                    .font(.system(size: 15, weight: .medium)).foregroundStyle(caption.translation.isEmpty ? Color.gray : ink)
-                            }.textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
+                            CaptionRecordView(caption: caption).equatable()
                             Divider().overlay(.white.opacity(0.03))
                         }
                     }
@@ -218,6 +210,21 @@ struct MainView: View {
 
     private func sectionLabel(_ title: String) -> some View {
         Text(title).font(.system(size: 11, weight: .semibold)).foregroundStyle(accent)
+    }
+}
+
+private struct CaptionRecordView: View, Equatable {
+    let caption: Caption
+    var body: some View {
+VStack(alignment: .leading, spacing: 6) {
+                                HStack {
+                                    Text(CaptionStore.timestamp(caption.start).prefix(8)).font(.system(size: 9, design: .monospaced))
+                                    if !caption.isFinal { Text("识别中").font(.system(size: 9)) }
+                                }.foregroundStyle(.tertiary)
+                                Text(caption.source).font(.system(size: 13)).foregroundStyle(.secondary)
+                                Text(caption.translation.isEmpty ? "正在翻译…" : caption.translation)
+                                    .font(.system(size: 15, weight: .medium)).foregroundStyle(caption.translation.isEmpty ? Color.gray : ink)
+                            }.textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -236,55 +243,50 @@ private struct AudioMeterView: View {
 }
 
 struct OverlayView: View {
-    @ObservedObject var model: AppModel
-    private var status: String {
-        if model.isDemo { return model.isTextTrial ? "词典文字试译 · 未读取音频" : "字幕预览 · 演示文字" }
-        if !model.busy { return "字幕已停止" }
-        if model.isPreparing { return "正在准备" }
-        guard let caption = model.current else { return "\(model.language.title) → 中文 · 等待语音" }
-        if !caption.isFinal { return "\(model.language.title) → 中文 · 实时更新" }
-        if caption.translatedSource != caption.source { return "\(model.language.title) → 中文 · 正在翻译" }
-        return "\(model.language.title) → 中文"
-    }
+    let model: AppModel
+    @ObservedObject var presentation: SubtitlePresentation
+    private var state: SubtitleSnapshot { presentation.snapshot }
     var body: some View {
         VStack(spacing: 8) {
             HStack(spacing: 5) {
+                if !state.locked {
                 PanelHandle(kind: .move)
                     .overlay(alignment: .leading) {
                         HStack(spacing: 6) {
                             Image(systemName: "line.3.horizontal").font(.system(size: 11))
-                            Circle().fill(model.isRunning ? Color.green : accent).frame(width: 5, height: 5)
-                            Text(status).font(.system(size: 10, weight: .medium))
-                        }.foregroundStyle(.white.opacity(0.50)).allowsHitTesting(false)
-                    }.frame(maxWidth: .infinity).frame(height: 18)
-                    .help("按住顶部拖动条移动字幕窗")
-                if !model.overlayLocked {
+                            Circle().fill(state.running ? Color.green : accent).frame(width: 5, height: 5)
+                            Text(state.status).font(.system(size: 10, weight: .medium))
+                        }.padding(.horizontal, 8).foregroundStyle(.white.opacity(0.75)).allowsHitTesting(false)
+                    }.frame(maxWidth: .infinity).frame(height: 24)
+                    .help("按住顶部拖动条移动字幕窗，透明样式也可拖动")
+                }
+                if !state.locked {
                     Button { model.toggleLock() } label: { Image(systemName: "cursorarrow.slash").font(.system(size: 11)) }
                         .help("鼠标穿透；从主窗口或菜单栏解锁")
                     Button { model.setOverlay(visible: false) } label: { Image(systemName: "xmark").font(.system(size: 10)) }
                         .help("隐藏字幕窗")
                 }
-            }.buttonStyle(.plain).foregroundStyle(.white.opacity(0.55))
+            }.buttonStyle(.plain).foregroundStyle(.white.opacity(0.65))
             VStack(spacing: 6) {
-                if let caption = model.current {
-                    SubtitleTextView(caption: caption, style: model.subtitleStyle, targetSize: model.fontSize,
-                                     width: model.overlayWidth, height: model.overlayHeight, automatic: model.overlayAutoHeight)
+                if let caption = state.caption {
+                    SubtitleTextView(caption: caption, style: state.style, targetSize: state.targetSize,
+                                     width: state.width, height: state.height, automatic: state.automatic)
                         .equatable()
                 } else {
-                    Text(model.isPreparing ? "正在准备语言模型…" : "等待直播语音…")
-                        .font(.system(size: model.fontSize * 0.8)).foregroundStyle(.white.opacity(0.65))
+                    Text(state.preparing ? "正在准备语言模型…" : "等待直播语音…")
+                        .font(.system(size: state.targetSize * 0.8)).foregroundStyle(.white.opacity(0.65))
                     Text("无需直播自带字幕").font(.system(size: 12)).foregroundStyle(.white.opacity(0.35))
                 }
             }.frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .multilineTextAlignment(.center).frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.horizontal, 22).padding(.vertical, 13)
-        .background(SubtitleColor.color(model.subtitleStyle.backgroundColor).opacity(model.backgroundOpacity),
-                    in: RoundedRectangle(cornerRadius: model.subtitleStyle.cornerRadius))
-        .overlay(RoundedRectangle(cornerRadius: model.subtitleStyle.cornerRadius)
-            .stroke(.white.opacity(model.subtitleStyle.showsBorder ? 0.10 : 0), lineWidth: 1))
+        .background(SubtitleColor.color(state.style.backgroundColor).opacity(state.opacity),
+                    in: RoundedRectangle(cornerRadius: state.style.cornerRadius))
+        .overlay(RoundedRectangle(cornerRadius: state.style.cornerRadius)
+            .stroke(.white.opacity(state.style.showsBorder ? 0.10 : 0), lineWidth: 1))
         .overlay(alignment: .bottomTrailing) {
-            if !model.overlayLocked {
+            if !state.locked {
                 PanelHandle(kind: .resize) { model.overlayAutoHeight = false }
                     .frame(width: 26, height: 26).padding(5)
                     .help("按住右下角拖动，调整字幕窗宽度和高度")
